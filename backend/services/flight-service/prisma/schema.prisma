@@ -1,0 +1,67 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Airline {
+  id            Int           @id @default(autoincrement())
+  code          String        @unique @db.Char(2)
+  name          String
+  flights       Flight[]
+  sharedFlights SharedFlight[] @relation("SharedAirline")
+}
+
+model Airport {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.Char(3)
+  name      String
+  city      String
+  country   String
+
+  departingFlights Flight[] @relation("DepartureAirport")
+  arrivingFlights  Flight[] @relation("ArrivalAirport")
+}
+
+model AircraftType {
+  id                Int      @id @default(autoincrement())
+  modelName         String   @unique
+  seatCapacity      Int
+  seatingPlanJson   Json
+  maxCrewCount      Int
+  maxPassengerCount Int
+  standardMenu      String
+  flights           Flight[]
+}
+
+model Flight {
+  id                      Int          @id @default(autoincrement())
+  flightNumber            String       @unique @db.Char(6)
+  airlineId               Int
+  airline                 Airline      @relation(fields: [airlineId], references: [id])
+  departureTime           DateTime
+  durationMinutes         Int
+  distanceKm              Float
+  sourceAirportCode       String
+  sourceAirport           Airport      @relation("DepartureAirport", fields: [sourceAirportCode], references: [code])
+  destinationAirportCode  String
+  destinationAirport      Airport      @relation("ArrivalAirport", fields: [destinationAirportCode], references: [code])
+  aircraftTypeId          Int
+  aircraftType            AircraftType @relation(fields: [aircraftTypeId], references: [id])
+  sharedFlight            SharedFlight?
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+}
+
+model SharedFlight {
+  id                  Int      @id @default(autoincrement())
+  mainFlightId        Int      @unique
+  mainFlight          Flight   @relation(fields: [mainFlightId], references: [id], onDelete: Cascade)
+  partnerFlightNumber String   @db.Char(6)
+  partnerAirlineId    Int
+  partnerAirline      Airline  @relation("SharedAirline", fields: [partnerAirlineId], references: [id])
+  connectingFlightInfo String?
+}
