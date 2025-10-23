@@ -23,6 +23,14 @@ app.use("/flights", flightRoutes);
 // Health
 app.get("/health", (req, res) => res.json({ message: "ok" }));
 
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Endpoint not found",
+    path: req.originalUrl,
+    method: req.method,
+  });
+});
+
 // Error middleware
 app.use(errorHandler);
 
