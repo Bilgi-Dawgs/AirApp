@@ -1,5 +1,5 @@
 import "express-async-errors";
-import { errorHandler } from "../middlewares/errorMiddleware.js";
+import { errorHandler } from "./middlewares/errorMiddleware.js";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -18,10 +18,10 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // Routes
-app.use("/api/flights", flightRoutes);
+app.use("/flights", flightRoutes);
 
 // Health
-app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.get("/health", (req, res) => res.json({ message: "ok" }));
 
 // Error middleware
 app.use(errorHandler);

@@ -29,8 +29,50 @@ export const getFlightById = async (id) => {
   });
 };
 
+const generateFlightNumber = async () => {
+  const airlineCode = "TK"; // constant
+  const lastFlight = await prisma.flight.findFirst({
+    orderBy: { id: "desc" },
+  });
+
+  let number = 1000;
+  if (lastFlight) {
+    const lastNum = parseInt(lastFlight.flightNumber.slice(2));
+    number = lastNum + 1;
+  }
+
+  return `${airlineCode}${number.toString().padStart(4, "0")}`;
+};
+
 export const createFlight = async (data) => {
-  // validation will change
-  if (!data.flightNumber) throw new Error("flightNumber required");
-  return prisma.flight.create({ data });
+  const flightNumber = await generateFlightNumber();
+
+  return prisma.flight.create({
+    data: {
+      ...data,
+      flightNumber,
+    },
+  });
+};
+
+export const deleteFlightById = async (id) => {
+  return prisma.flight.delete({
+    where: { id: Number(id) },
+  });
+};
+
+// patch
+export const updateFlightById = async (id, updates) => {
+  return prisma.flight.update({
+    where: { id: Number(id) },
+    data: updates,
+  });
+};
+
+// put
+export const replaceFlightById = async (id, data) => {
+  return prisma.flight.update({
+    where: { id: Number(id) },
+    data,
+  });
 };

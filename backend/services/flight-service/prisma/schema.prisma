@@ -37,6 +37,14 @@ model AircraftType {
   flights           Flight[]
 }
 
+enum FlightStatus {
+  scheduled
+  ongoing
+  delayed
+  cancelled
+  completed
+}
+
 model Flight {
   id                      Int          @id @default(autoincrement())
   flightNumber            String       @unique @db.Char(6)
@@ -52,6 +60,7 @@ model Flight {
   aircraftTypeId          Int
   aircraftType            AircraftType @relation(fields: [aircraftTypeId], references: [id])
   sharedFlight            SharedFlight?
+  status                  FlightStatus @default(scheduled) 
   createdAt               DateTime     @default(now())
   updatedAt               DateTime     @updatedAt
 }

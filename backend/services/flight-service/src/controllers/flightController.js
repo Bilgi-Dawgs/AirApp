@@ -25,9 +25,8 @@ export const getFlight = async (req, res) => {
 export const addFlight = async (req, res) => {
   const data = req.body;
 
-  // Basic validations
+  // (Temporary validations)
   const requiredFields = [
-    "flightNumber",
     "airlineId",
     "departureTime",
     "sourceAirportCode",
@@ -44,4 +43,61 @@ export const addFlight = async (req, res) => {
   const newFlight = await flightService.createFlight(data);
 
   res.status(201).json({ newFlight });
+};
+
+export const deleteFlight = async (req, res) => {
+  const { id } = req.params;
+
+  const deleted = await flightService.deleteFlightById(id);
+  // (Temporary validations)
+  if (!deleted) {
+    throw new CustomError(`Flight with ID ${id} not found`, 404);
+  }
+
+  res.status(200).json({ message: "Flight deleted successfully" });
+};
+
+export const updateFlight = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // (Temporary validations)
+  if (!id) {
+    throw new CustomError(`Flight with ID ${id} not found`, 404);
+  }
+  if (!status) {
+    throw new CustomError("Status field can't be empty.", 400);
+  }
+  const updatedFlight = await flightService.updateFlightById(id, {
+    status,
+  });
+
+  res.status(200).json({ updatedFlight });
+};
+
+export const replaceFlight = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  // (Temporary validations)
+  const requiredFields = [
+    "airlineId",
+    "departureTime",
+    "sourceAirportCode",
+    "destinationAirportCode",
+    "aircraftTypeId",
+  ];
+
+  if (!id) {
+    throw new CustomError(`Flight with ID ${id} not found`, 404);
+  }
+
+  for (const field of requiredFields) {
+    if (!data[field]) {
+      throw new CustomError(`Missing required field: ${field}`, 400);
+    }
+  }
+
+  const replacedFlight = await flightService.replaceFlightById(id, data);
+  res.status(200).json({ replacedFlight });
 };
