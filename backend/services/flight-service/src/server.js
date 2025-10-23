@@ -1,3 +1,5 @@
+import "express-async-errors";
+import { errorHandler } from "../middlewares/errorMiddleware.js";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -21,11 +23,8 @@ app.use("/api/flights", flightRoutes);
 // Health
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
-// Error handler (add middleware)
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: err.message || "Internal Server Error" });
-});
+// Error middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8086;
 app.listen(PORT, () => {
