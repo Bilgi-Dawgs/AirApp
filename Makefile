@@ -2,6 +2,7 @@
 # Global Variables
 # ==============================
 DOCKER_COMPOSE = docker compose
+ENV_FILE = --env-file ./env/.env
 USER_SERVICE_PATH = ./backend/services/user-service
 
 # ==============================
@@ -16,29 +17,28 @@ help:
 	@echo "  make run          - Start all services (in detached mode)"
 	@echo "  make stop         - Stop all containers"
 	@echo "  make logs         - Show logs"
-	@echo "  make clean        - Remove containers and images"
+	@echo "  make clean        - Remove containers, volumes, and orphans"
 	@echo "  make rebuild      - Clean and rebuild everything"
-	@echo "  make user-service - Build only user-service"
-
+	@echo "  make user-service - Build only user-service module"
 
 # ==============================
 # Build / Run / Clean
 # ==============================
 
 build:
-	$(DOCKER_COMPOSE) build
+	$(DOCKER_COMPOSE) $(ENV_FILE) build
 
 run:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) $(ENV_FILE) up -d
 
 stop:
-	$(DOCKER_COMPOSE) down
+	$(DOCKER_COMPOSE) $(ENV_FILE) down
 
 logs:
-	$(DOCKER_COMPOSE) logs -f
+	$(DOCKER_COMPOSE) $(ENV_FILE) logs -f
 
 clean:
-	$(DOCKER_COMPOSE) down --volumes --remove-orphans
+	$(DOCKER_COMPOSE) $(ENV_FILE) down --volumes --remove-orphans
 
 rebuild: clean build run
 
@@ -47,5 +47,5 @@ rebuild: clean build run
 # ==============================
 
 user-service:
-	cd $(USER_SERVICE_PATH) && mvn clean package -DskipTests
-	$(DOCKER_COMPOSE) build user-service
+	cd $(USER_SERVICE_PATH) && mvn clean package -DskipTests -q
+	$(DOCKER_COMPOSE) $(ENV_FILE) build user-service

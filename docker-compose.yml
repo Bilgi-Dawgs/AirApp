@@ -1,17 +1,20 @@
 services:
-  # =======================
-  # MySQL
-  # =======================
+
+  # ==========================================================
+  #                    User MYSQL Database
+  # ==========================================================
   user-mysql:
     image: mysql:8.0
+    restart: always
     env_file:
-      - .env
+      - ./env/.env
     environment:
       MYSQL_DATABASE: ${USER_DB_NAME}
-      MYSQL_ROOT_PASSWORD: ${USER_DB_ROOT_PASS}
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/user_db_root
       MYSQL_USER_FILE: /run/secrets/user_db_user
       MYSQL_PASSWORD_FILE: /run/secrets/user_db_pass
     secrets:
+      - user_db_root
       - user_db_user
       - user_db_pass
     ports:
@@ -21,23 +24,25 @@ services:
     networks:
       - airapp-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${USER_DB_ROOT_PASS}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$(cat /run/secrets/user_db_root) || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
 
-  # =======================
-  # User Service (Spring)
-  # =======================
+
+  # ==========================================================
+  #                      User Service
+  # ==========================================================
   user-service:
     build: ./backend/services/user-service
     env_file:
-      - .env
+      - ./env/.env
+      - ./env/.env.spring
     environment:
-      DB_URL: jdbc:mysql://user-mysql:${USER_DB_PORT}/${USER_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_PROFILES_ACTIVE: ${ENV}
+      DB_URL: jdbc:mysql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       DB_USERNAME_FILE: /run/secrets/user_db_user
       DB_PASSWORD_FILE: /run/secrets/user_db_pass
-      SPRING_PROFILES_ACTIVE: ${ENV}
     secrets:
       - user_db_user
       - user_db_pass
@@ -45,29 +50,34 @@ services:
       user-mysql:
         condition: service_healthy
     ports:
-      - "${USER_SERVICE_PORT}:8081"
+      - "${USER_SERVICE_PORT}:8085"
     entrypoint: ["/bin/sh", "-c", "/app/entrypoint.sh"]
     networks:
       - airapp-network
 
-# =======================
-# Secrets
-# =======================
+
+# ==========================================================
+#                        Secrets
+# ==========================================================
 secrets:
+  user_db_root:
+    file: ./secrets/user_db_root.txt
   user_db_user:
     file: ./secrets/user_db_user.txt
   user_db_pass:
     file: ./secrets/user_db_pass.txt
 
-# =======================
-# Volumes
-# =======================
+
+# ==========================================================
+#                        Volumes
+# ==========================================================
 volumes:
   user-mysql-data:
 
-# =======================
-# Network
-# =======================
+
+# ==========================================================
+#                        Networks
+# ==========================================================
 networks:
   airapp-network:
     driver: bridge
