@@ -49,5 +49,24 @@ export const checkinPassenger = async (req, res) => {
 export const deletePassenger = async (req, res) => {
   const { pid } = req.params;
   await passengerService.deletePassengerById(pid);
-  res.status(204).send();
+  res.status(200).json({ message: "Passenger deleted successfully" });
+};
+
+// internal endpoints
+export const internalList = async (req, res) => {
+  const passengers = await passengerService.getAllPassengers(req.query);
+  res.status(200).json({ passengers });
+};
+
+export const internalByFlight = async (req, res) => {
+  const { flightid } = req.params;
+  const list = await passengerService.getPassengersByFlight(flightid);
+  res.status(200).json({ passengers: list });
+};
+
+export const internalPatchStatus = async (req, res) => {
+  const { pid } = req.params;
+  const { checkedIn } = req.body;
+  const p = await passengerService.updatePassengerById(pid, { checkedIn });
+  res.status(200).json({ updated: p });
 };
