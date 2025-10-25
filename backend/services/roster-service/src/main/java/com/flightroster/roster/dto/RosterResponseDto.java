@@ -3,7 +3,7 @@ package com.flightroster.roster.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.flightroster.roster.entity.Status;
+import com.flightroster.roster.enums.Status;
 
 import lombok.Data;
 

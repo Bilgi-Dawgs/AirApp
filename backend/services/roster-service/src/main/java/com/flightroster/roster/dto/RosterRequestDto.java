@@ -2,6 +2,8 @@ package com.flightroster.roster.dto;
 
 import java.util.List;
 
+import com.flightroster.roster.enums.StorageType;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -21,4 +23,7 @@ public class RosterRequestDto
 
     @NotEmpty(message = "Passenger list cannot be empty")
     private List<Long> passengerIds;
+
+    @NotEmpty(message = "Aircraft ID cannot be empty")
+    private StorageType storageType;
 }

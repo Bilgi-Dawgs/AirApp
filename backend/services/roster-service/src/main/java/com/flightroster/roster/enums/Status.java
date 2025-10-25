@@ -1,4 +1,4 @@
-package com.flightroster.roster.entity;
+package com.flightroster.roster.enums;
 
 /**
  * @brief Enumeration representing possible roster states.

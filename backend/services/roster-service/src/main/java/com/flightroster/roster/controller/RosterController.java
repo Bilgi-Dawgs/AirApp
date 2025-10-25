@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flightroster.roster.dto.RosterRequestDto;
 import com.flightroster.roster.dto.RosterResponseDto;
 import com.flightroster.roster.dto.RosterUpdateDto;
+import com.flightroster.roster.enums.StorageType;
 import com.flightroster.roster.service.RosterService;
 
 /**
@@ -38,12 +40,42 @@ public class RosterController
         this.service = service;
     }
 
-    // ===================== CREATE =====================
+    // ============================================================
+    // PUBLIC ENDPOINTS
+    // ============================================================
 
     /**
-     * @brief Creates a new roster.
-     * @param dto The DTO containing roster creation data.
-     * @return ResponseEntity containing the created roster DTO.
+     * @brief [GET] /roster/{id}
+     * @details Retrieve a single roster by its ID (Public)
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<RosterResponseDto> getRosterById(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
+    {
+        RosterResponseDto roster = service.getRosterById(id, storageType);
+        return (ResponseEntity.ok(roster));
+    }
+
+    /**
+     * @brief [GET] /roster
+     * @details Retrieve all rosters (Public)
+     */
+    @GetMapping
+    public ResponseEntity<List<RosterResponseDto>> getAllRosters(
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
+    {
+        List<RosterResponseDto> rosters = service.getAllRosters(storageType);
+        return (ResponseEntity.ok(rosters));
+    }
+
+    // ============================================================
+    // PROTECTED ENDPOINTS
+    // ============================================================
+
+    /**
+     * @brief [POST] /roster
+     * @details Create a new roster (Protected)
      */
     @PostMapping
     public ResponseEntity<RosterResponseDto> createRoster(@RequestBody RosterRequestDto dto)
@@ -55,81 +87,101 @@ public class RosterController
                 .body(created));
     }
 
-    // ===================== READ =====================
-
     /**
-     * @brief Retrieves all rosters.
-     * @return ResponseEntity containing list of all roster DTOs.
-     */
-    @GetMapping
-    public ResponseEntity<List<RosterResponseDto>> getAllRosters()
-    {
-        List<RosterResponseDto> rosters = service.getAllRosters();
-        return (ResponseEntity.ok(rosters));
-    }
-
-    /**
-     * @brief Retrieves a roster by ID.
-     * @param id The roster ID.
-     * @return ResponseEntity containing the roster DTO.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<RosterResponseDto> getRosterById(@PathVariable Long id)
-    {
-        RosterResponseDto roster = service.getRosterById(id);
-        return (ResponseEntity.ok(roster));
-    }
-
-    // ===================== UPDATE =====================
-
-    /**
-     * @brief Updates an existing roster.
-     * @param id The roster ID.
-     * @param dto The DTO containing updated values.
-     * @return ResponseEntity containing updated roster DTO.
+     * @brief [PUT] /roster/{id}
+     * @details Update an existing roster (Protected)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<RosterResponseDto> updateRoster(@PathVariable Long id, @RequestBody RosterUpdateDto dto)
+    public ResponseEntity<RosterResponseDto> updateRoster(
+        @PathVariable Long id,
+        @RequestBody RosterUpdateDto dto,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
     {
-        RosterResponseDto updated = service.updateRoster(id, dto);
+        RosterResponseDto updated = service.updateRoster(id, dto, storageType);
         return (ResponseEntity.ok(updated));
     }
 
     /**
-     * @brief Finalizes a roster.
-     * @param id The roster ID.
-     * @return ResponseEntity containing finalized roster DTO.
+     * @brief [PATCH] /roster/{id}/finalize
+     * @details Finalize a roster (Protected)
      */
     @PatchMapping("/{id}/finalize")
-    public ResponseEntity<RosterResponseDto> finalizeRoster(@PathVariable Long id)
+    public ResponseEntity<RosterResponseDto> finalizeRoster(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
     {
-        RosterResponseDto finalized = service.finalizeRoster(id);
+        RosterResponseDto finalized = service.finalizeRoster(id, storageType);
         return (ResponseEntity.ok(finalized));
     }
 
     /**
-     * @brief Cancels a roster.
-     * @param id The roster ID.
-     * @return ResponseEntity containing cancelled roster DTO.
+     * @brief [PATCH] /roster/{id}/cancel
+     * @details Cancel a roster (Protected)
      */
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<RosterResponseDto> cancelRoster(@PathVariable Long id)
+    public ResponseEntity<RosterResponseDto> cancelRoster(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
     {
-        RosterResponseDto cancelled = service.cancelRoster(id);
+        RosterResponseDto cancelled = service.cancelRoster(id, storageType);
         return (ResponseEntity.ok(cancelled));
     }
 
-    // ===================== DELETE =====================
-
     /**
-     * @brief Deletes a roster by ID.
-     * @param id The roster ID.
-     * @return ResponseEntity with 204 No Content status.
+     * @brief [DELETE] /roster/{id}
+     * @details Delete a roster (Protected)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoster(@PathVariable Long id)
+    public ResponseEntity<Void> deleteRoster(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
     {
-        service.deleteRoster(id);
+        service.deleteRoster(id, storageType);
         return (ResponseEntity.noContent().build());
     }
+
+    // ============================================================
+    // ADMIN ENDPOINTS
+    // ============================================================
+
+    /**
+     * @brief [DELETE] /roster/admin/hard-delete/{id}
+     * @details Permanently delete a roster (Admin only)
+     */
+    @DeleteMapping("/admin/hard-delete/{id}")
+    public ResponseEntity<Void> hardDeleteRoster(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "SQL") StorageType storageType)
+    {
+        service.hardDeleteRoster(id, storageType);
+        return (ResponseEntity.noContent().build());
+    }
+
+    // ============================================================
+    // INTERNAL ENDPOINTS (Service-to-service communication)
+    // ============================================================
+
+    /**
+     * @brief [GET] /roster/internal/list
+     * @details Return all roster summaries (Internal)
+     */
+    // @GetMapping("/internal/list")
+
+    /**
+     * @brief [POST] /roster/internal/sync
+     * @details Sync roster data with other services (Internal)
+     */
+    // @PostMapping("/internal/sync")
+
+    /**
+     * @brief [PATCH] /roster/internal/status/{id}
+     * @details Update roster status internally (Internal)
+     */
+    // @PatchMapping("/internal/status/{id}")
+
+    /**
+     * @brief [GET] /roster/internal/flight/{flightId}
+     * @details Retrieve rosters for a specific flight (Internal)
+     */
+    // @GetMapping("/internal/flight/{flightId}")
 }
