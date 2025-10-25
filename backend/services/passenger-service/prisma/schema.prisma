@@ -1,0 +1,29 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ClassType {
+  economy
+  business
+  first
+}
+
+model Passenger {
+  id             Int       @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  passportNumber String    @unique
+  ticketNumber   String    @unique
+  flightId       Int
+  seatNumber     String?
+  classType      ClassType
+  nationality    String
+  checkedIn      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
