@@ -4,7 +4,6 @@ import { CustomError } from "../middlewares/customError.js";
 export const getEmployee = async (req, res) => {
   const { id } = req.params;
   const employee = await employeeService.getEmployeeById(id);
-  if (!employee) throw new CustomError("Employee not found", 404);
   res.status(200).json({ employee });
 };
 
