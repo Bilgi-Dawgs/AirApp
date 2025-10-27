@@ -1,0 +1,33 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Position {
+  PILOT
+  FIRST_OFFICER
+  FLIGHT_ATTENDANT
+}
+
+enum Status {
+  AVAILABLE
+  ON_DUTY
+  OFF_DUTY
+}
+
+model Employee {
+  id               BigInt   @id @default(autoincrement()) // Long PK
+  firstName        String
+  lastName         String
+  position         Position
+  licenseNumber    String   @unique
+  experienceYears  Int
+  assignedFlightId BigInt? 
+  status           Status   @default(AVAILABLE)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
