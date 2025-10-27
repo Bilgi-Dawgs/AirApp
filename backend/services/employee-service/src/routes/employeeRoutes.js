@@ -8,6 +8,7 @@ import {
   validateEmployeeInput,
   validateListQuery,
 } from "../middlewares/validationMiddleware.js";
+import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -22,26 +23,46 @@ router.get(
 // protected
 router.patch(
   "/:id/assignFlight",
+  verifyJWT,
+  hasRole("crew_manager", "scheduler", "admin"),
   validateAssignFlight,
   employeeController.assignFlight
 );
 router.patch(
   "/:id/status",
+  verifyJWT,
+  hasRole("crew_manager", "scheduler", "admin"),
   validateStatusPatch,
   employeeController.updateStatus
 );
 
 // admin
-router.get("/", validateListQuery, employeeController.listEmployees);
-router.post("/", validateEmployeeInput, employeeController.createEmployee);
+router.get(
+  "/",
+  verifyJWT,
+  hasRole("admin"),
+  validateListQuery,
+  employeeController.listEmployees
+);
+router.post(
+  "/",
+  verifyJWT,
+  hasRole("admin"),
+  validateEmployeeInput,
+  employeeController.createEmployee
+);
 router.put(
   "/:id",
+  verifyJWT,
+  hasRole("admin"),
   validateEmployeeIdParam,
   validateEmployeeInput,
   employeeController.replaceEmployee
 );
 router.delete(
   "/:id",
+  verifyJWT,
+  hasRole("admin"),
   validateEmployeeIdParam,
   employeeController.deleteEmployee
 );
