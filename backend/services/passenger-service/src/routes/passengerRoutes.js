@@ -4,6 +4,7 @@ import {
   validatePassengerInput,
   validatePassengerIdParam,
 } from "../middlewares/validationMiddleware.js";
+import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -13,25 +14,37 @@ router.get("/:pid", validatePassengerIdParam, passengerController.getPassenger);
 router.get("/by-flight/:flightid", passengerController.getByFlight);
 
 // protected (auth service not ready yet)
-router.post("/", validatePassengerInput, passengerController.addPassenger);
+router.post(
+  "/",
+  verifyJWT,
+  hasRole("admin", "scheduler"),
+  validatePassengerInput,
+  passengerController.addPassenger
+);
 router.put(
   "/:pid",
+  verifyJWT,
+  hasRole("admin", "scheduler"),
   validatePassengerIdParam,
   validatePassengerInput,
   passengerController.updatePassenger
 );
 router.patch(
   "/checkin/:pid",
+  verifyJWT,
+  hasRole("passenger", "admin", "scheduler", "crew_manager"),
   validatePassengerIdParam,
   passengerController.checkinPassenger
 );
 router.delete(
   "/:pid",
+  verifyJWT,
+  hasRole("admin", "scheduler"),
   validatePassengerIdParam,
   passengerController.deletePassenger
 );
 
-// internal
+// internal (service-to-service authorization logic awaits)
 router.get("/internal/list", passengerController.internalList);
 router.get("/internal/flight/:flightid", passengerController.internalByFlight);
 router.patch(
