@@ -14,12 +14,12 @@ enum ClassType {
 }
 
 model Passenger {
-  id             Int       @id @default(autoincrement())
+  id             BigInt       @id @default(autoincrement())
   firstName      String
   lastName       String
   passportNumber String    @unique
   ticketNumber   String    @unique
-  flightId       Int
+  flightId       BigInt
   seatNumber     String?
   classType      ClassType
   nationality    String

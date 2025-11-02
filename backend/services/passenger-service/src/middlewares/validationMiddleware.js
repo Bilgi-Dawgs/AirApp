@@ -3,7 +3,7 @@ import { CustomError } from "./customError.js";
 
 const withValidationErrors = (validators) => {
   return [
-    validators,
+    ...validators,
     async (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -20,9 +20,11 @@ export const validatePassengerIdParam = withValidationErrors([
     .notEmpty()
     .withMessage("Passenger ID is required")
     .bail()
-    .isInt({ gt: 0 })
-    .withMessage("Passenger ID must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => BigInt(value))
+    .custom((value) => {
+      if (value <= 0n) throw new Error("passengerId must be a positive bigint");
+      return true;
+    }),
 ]);
 
 export const validatePassengerInput = withValidationErrors([
@@ -42,9 +44,11 @@ export const validatePassengerInput = withValidationErrors([
     .notEmpty()
     .withMessage("flightId is required")
     .bail()
-    .isInt({ gt: 0 })
-    .withMessage("flightId must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => BigInt(value))
+    .custom((value) => {
+      if (value <= 0n) throw new Error("flightID must be a positive bigint");
+      return true;
+    }),
   body("classType")
     .notEmpty()
     .withMessage("classType is required")

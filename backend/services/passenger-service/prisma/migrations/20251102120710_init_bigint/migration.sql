@@ -3,12 +3,12 @@ CREATE TYPE "ClassType" AS ENUM ('economy', 'business', 'first');
 
 -- CreateTable
 CREATE TABLE "Passenger" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "passportNumber" TEXT NOT NULL,
     "ticketNumber" TEXT NOT NULL,
-    "flightId" INTEGER NOT NULL,
+    "flightId" BIGINT NOT NULL,
     "seatNumber" TEXT,
     "classType" "ClassType" NOT NULL,
     "nationality" TEXT NOT NULL,

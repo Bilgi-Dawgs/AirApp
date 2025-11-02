@@ -28,15 +28,53 @@ export const getByFlight = async (req, res) => {
 };
 
 export const addPassenger = async (req, res) => {
-  const data = req.body;
-  const created = await passengerService.createPassenger(data);
+  const {
+    firstName,
+    lastName,
+    passportNumber,
+    ticketNumber,
+    flightId,
+    seatNumber,
+    classType,
+    nationality,
+  } = req.body;
+
+  const created = await passengerService.createPassenger({
+    firstName,
+    lastName,
+    passportNumber,
+    ticketNumber,
+    flightId,
+    seatNumber,
+    classType,
+    nationality,
+  });
   res.status(201).json({ passenger: created });
 };
 
 export const updatePassenger = async (req, res) => {
   const { pid } = req.params;
-  const updates = req.body;
-  const updated = await passengerService.updatePassengerById(pid, updates);
+  const {
+    firstName,
+    lastName,
+    passportNumber,
+    ticketNumber,
+    seatNumber,
+    classType,
+    nationality,
+    checkedIn,
+  } = req.body;
+
+  const updated = await passengerService.updatePassengerById(pid, {
+    firstName,
+    lastName,
+    passportNumber,
+    ticketNumber,
+    seatNumber,
+    classType,
+    nationality,
+    checkedIn,
+  });
   res.status(200).json({ updated });
 };
 

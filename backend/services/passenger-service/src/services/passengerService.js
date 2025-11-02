@@ -2,7 +2,7 @@ import prisma from "../db/prismaClient.js";
 
 export const getAllPassengers = async (filters = {}) => {
   const where = {};
-  if (filters.flightId) where.flightId = Number(filters.flightId);
+  if (filters.flightId) where.flightId = BigInt(filters.flightId);
   if (filters.checkedIn !== undefined) {
     where.checkedIn =
       typeof filters.checkedIn === "string"
@@ -16,11 +16,11 @@ export const getAllPassengers = async (filters = {}) => {
 };
 
 export const getPassengerById = async (id) => {
-  return prisma.passenger.findUniqueOrThrow({ where: { id: Number(id) } });
+  return prisma.passenger.findUniqueOrThrow({ where: { id: BigInt(id) } });
 };
 
 export const getPassengersByFlight = async (flightId) => {
-  return prisma.passenger.findMany({ where: { flightId: Number(flightId) } });
+  return prisma.passenger.findMany({ where: { flightId: BigInt(flightId) } });
 };
 
 export const createPassenger = async (data) => {
@@ -29,7 +29,7 @@ export const createPassenger = async (data) => {
     lastName: data.lastName,
     passportNumber: data.passportNumber,
     ticketNumber: data.ticketNumber,
-    flightId: Number(data.flightId),
+    flightId: BigInt(data.flightId),
     seatNumber: data.seatNumber || null,
     classType: data.classType,
     nationality: data.nationality,
@@ -39,18 +39,18 @@ export const createPassenger = async (data) => {
 
 export const updatePassengerById = async (id, updates) => {
   return prisma.passenger.update({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
     data: updates,
   });
 };
 
 export const checkinPassenger = async (id) => {
   return prisma.passenger.update({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
     data: { checkedIn: true },
   });
 };
 
 export const deletePassengerById = async (id) => {
-  return prisma.passenger.delete({ where: { id: Number(id) } });
+  return prisma.passenger.delete({ where: { id: BigInt(id) } });
 };
