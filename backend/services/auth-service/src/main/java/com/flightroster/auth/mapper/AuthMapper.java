@@ -4,6 +4,8 @@ package com.flightroster.auth.mapper;
 
 import java.time.LocalDateTime;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.flightroster.auth.dto.response.AuthResponse;
@@ -35,6 +37,15 @@ public class AuthMapper
 			.refreshToken(refreshToken)
 			.tokenType("Bearer")
 			.expiresIn(expiresIn)
+			.build());
+	}
+
+	public UserDetails toUserDetails(AuthUser user)
+	{
+		return (User.builder()
+			.username(user.getEmail())
+			.password(user.getPasswordHash())
+			.roles(user.getRole().name())
 			.build());
 	}
 }
