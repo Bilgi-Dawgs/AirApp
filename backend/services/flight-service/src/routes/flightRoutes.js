@@ -3,6 +3,7 @@ import * as flightController from "../controllers/flightController.js";
 import {
   validateFlightIdParam,
   validateFlightInput,
+  validateFlightStatus,
 } from "../middlewares/validationMiddleware.js";
 import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
@@ -31,6 +32,7 @@ router.patch(
   "/:id",
   verifyJWT,
   hasRole("scheduler", "admin"),
+  validateFlightStatus,
   validateFlightIdParam,
   flightController.updateFlight
 );

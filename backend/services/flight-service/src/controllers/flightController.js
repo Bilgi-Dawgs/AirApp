@@ -18,8 +18,27 @@ export const getFlight = async (req, res) => {
 };
 
 export const addFlight = async (req, res) => {
-  const data = req.body;
-  const newFlight = await flightService.createFlight(data);
+  const {
+    airlineId,
+    departureTime,
+    durationMinutes,
+    distanceKm,
+    sourceAirportCode,
+    destinationAirportCode,
+    aircraftTypeId,
+    status,
+  } = req.body;
+
+  const newFlight = await flightService.createFlight({
+    airlineId,
+    departureTime,
+    durationMinutes,
+    distanceKm,
+    sourceAirportCode,
+    destinationAirportCode,
+    aircraftTypeId,
+    status,
+  });
 
   res.status(201).json({ newFlight });
 };
@@ -34,17 +53,33 @@ export const deleteFlight = async (req, res) => {
 export const updateFlight = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const updatedFlight = await flightService.updateFlightById(id, {
-    status,
-  });
+  const updatedFlight = await flightService.updateFlightById(id, { status });
 
   res.status(200).json({ updatedFlight });
 };
 
 export const replaceFlight = async (req, res) => {
   const { id } = req.params;
-  const data = req.body;
+  const {
+    airlineId,
+    departureTime,
+    durationMinutes,
+    distanceKm,
+    sourceAirportCode,
+    destinationAirportCode,
+    aircraftTypeId,
+    status,
+  } = req.body;
 
-  const replacedFlight = await flightService.replaceFlightById(id, data);
+  const replacedFlight = await flightService.replaceFlightById(id, {
+    airlineId,
+    departureTime,
+    durationMinutes,
+    distanceKm,
+    sourceAirportCode,
+    destinationAirportCode,
+    aircraftTypeId,
+    status,
+  });
   res.status(200).json({ replacedFlight });
 };

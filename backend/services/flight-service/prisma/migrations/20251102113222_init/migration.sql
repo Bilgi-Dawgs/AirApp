@@ -1,6 +1,9 @@
+-- CreateEnum
+CREATE TYPE "FlightStatus" AS ENUM ('scheduled', 'ongoing', 'delayed', 'cancelled', 'completed');
+
 -- CreateTable
 CREATE TABLE "Airline" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "code" CHAR(2) NOT NULL,
     "name" TEXT NOT NULL,
 
@@ -9,7 +12,7 @@ CREATE TABLE "Airline" (
 
 -- CreateTable
 CREATE TABLE "Airport" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "code" CHAR(3) NOT NULL,
     "name" TEXT NOT NULL,
     "city" TEXT NOT NULL,
@@ -20,7 +23,7 @@ CREATE TABLE "Airport" (
 
 -- CreateTable
 CREATE TABLE "AircraftType" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "modelName" TEXT NOT NULL,
     "seatCapacity" INTEGER NOT NULL,
     "seatingPlanJson" JSONB NOT NULL,
@@ -33,15 +36,16 @@ CREATE TABLE "AircraftType" (
 
 -- CreateTable
 CREATE TABLE "Flight" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "flightNumber" CHAR(6) NOT NULL,
-    "airlineId" INTEGER NOT NULL,
+    "airlineId" BIGINT NOT NULL,
     "departureTime" TIMESTAMP(3) NOT NULL,
     "durationMinutes" INTEGER NOT NULL,
     "distanceKm" DOUBLE PRECISION NOT NULL,
     "sourceAirportCode" TEXT NOT NULL,
     "destinationAirportCode" TEXT NOT NULL,
-    "aircraftTypeId" INTEGER NOT NULL,
+    "aircraftTypeId" BIGINT NOT NULL,
+    "status" "FlightStatus" NOT NULL DEFAULT 'scheduled',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -50,10 +54,10 @@ CREATE TABLE "Flight" (
 
 -- CreateTable
 CREATE TABLE "SharedFlight" (
-    "id" SERIAL NOT NULL,
-    "mainFlightId" INTEGER NOT NULL,
+    "id" BIGSERIAL NOT NULL,
+    "mainFlightId" BIGINT NOT NULL,
     "partnerFlightNumber" CHAR(6) NOT NULL,
-    "partnerAirlineId" INTEGER NOT NULL,
+    "partnerAirlineId" BIGINT NOT NULL,
     "connectingFlightInfo" TEXT,
 
     CONSTRAINT "SharedFlight_pkey" PRIMARY KEY ("id")

@@ -20,13 +20,11 @@ export const validateFlightIdParam = withValidationErrors([
   param("id")
     .notEmpty()
     .withMessage("Flight ID parameter is required")
-    .isInt({ gt: 0 })
-    .withMessage("Flight ID must be a positive integer")
     .bail()
-    .toInt()
+    .customSanitizer((value) => BigInt(value))
     .custom(async (value) => {
       const flight = await prisma.flight.findUnique({
-        where: { id: Number(value) },
+        where: { id: value },
       });
       if (!flight) {
         throw new CustomError(`Flight with ID ${value} not found`, 404);
@@ -38,8 +36,12 @@ export const validateFlightInput = withValidationErrors([
   body("airlineId")
     .notEmpty()
     .withMessage("airlineId is required")
-    .isInt({ gt: 0 })
-    .withMessage("airlineId must be a positive integer"),
+    .bail()
+    .customSanitizer((value) => BigInt(value))
+    .custom((value) => {
+      if (value <= 0n) throw new Error("airlineId must be a positive bigint");
+      return true;
+    }),
 
   body("departureTime")
     .notEmpty()
@@ -72,11 +74,24 @@ export const validateFlightInput = withValidationErrors([
   body("aircraftTypeId")
     .notEmpty()
     .withMessage("aircraftTypeId is required")
-    .isInt({ gt: 0 })
-    .withMessage("aircraftTypeId must be a positive integer"),
+    .bail()
+    .customSanitizer((value) => BigInt(value))
+    .custom((value) => {
+      if (value <= 0n)
+        throw new Error("aircraftTypeId must be a positive bigint");
+      return true;
+    }),
 
   body("status")
     .optional()
+    .isIn(["scheduled", "ongoing", "delayed", "cancelled", "completed"])
+    .withMessage("Invalid flight status value"),
+]);
+
+export const validateFlightStatus = withValidationErrors([
+  body("status")
+    .notEmpty()
+    .withMessage("status is required for this operation")
     .isIn(["scheduled", "ongoing", "delayed", "cancelled", "completed"])
     .withMessage("Invalid flight status value"),
 ]);

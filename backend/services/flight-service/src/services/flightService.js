@@ -19,7 +19,7 @@ export const getAllFlights = async (filters = {}) => {
 
 export const getFlightById = async (id) => {
   return prisma.flight.findUnique({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
     include: {
       airline: true,
       aircraftType: true,
@@ -57,14 +57,14 @@ export const createFlight = async (data) => {
 
 export const deleteFlightById = async (id) => {
   return prisma.flight.delete({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
   });
 };
 
 // patch
 export const updateFlightById = async (id, updates) => {
   return prisma.flight.update({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
     data: updates,
   });
 };
@@ -72,7 +72,7 @@ export const updateFlightById = async (id, updates) => {
 // put
 export const replaceFlightById = async (id, data) => {
   return prisma.flight.update({
-    where: { id: Number(id) },
+    where: { id: BigInt(id) },
     data,
   });
 };
