@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.flightroster.user.dto.UserRequestDto;
 import com.flightroster.user.dto.UserResponseDto;
 import com.flightroster.user.dto.UserUpdateDto;
+import com.flightroster.user.entity.Role;
+import com.flightroster.user.entity.Status;
 import com.flightroster.user.entity.User;
 import com.flightroster.user.exceptions.EmailAlreadyExistsException;
 import com.flightroster.user.exceptions.UserNotFoundException;
@@ -143,5 +145,84 @@ public class UserService
             throw (new UserNotFoundException("User with ID " + id + " not found"));
 
         userRepository.deleteById(id);
+    }
+
+    // ===================== INTERNAL =====================
+
+    /**
+     * Synchronizes user role by email.
+     * Accepts a Role enum directly. Logic is simplified.
+     */
+    public void syncUserRole(String email, Role newRole)
+    {
+        // Get user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
+
+        // Update role
+        user.setRole(newRole);
+
+        // Save changes
+        userRepository.save(user);
+    }
+
+    /**
+     * Syncs a new user from another internal service
+     * 
+     * @param dto (UserRequestDto): User data
+     * 
+     * @return UserResponseDto
+     */
+    public UserResponseDto syncUser(UserRequestDto dto)
+    {
+        // Check if user exists by email
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElse(new User()); // If not found, prepare a new instance
+
+        // Set/Update fields
+        if (user.getId() == null) // It is a new user
+        {
+            user.setEmail(dto.getEmail());
+            user.setStatus(Status.ACTIVE); // Default status
+        }
+
+        // Update fields that are allowed to change via sync
+        user.setUsername(dto.getUsername());
+        
+        // Only update role if provided in DTO
+        if (dto.getRole() != null)
+        {
+            user.setRole(dto.getRole());
+        }
+
+        // Only update balance if provided (or strictly sync logic depending on requirement)
+        if (dto.getBalance() != null)
+        {
+            user.setBalance(dto.getBalance());
+        }
+
+        // Save (Upsert)
+        User savedUser = userRepository.save(user);
+        
+        return (userMapper.toDto(savedUser));
+    }
+
+    /**
+     * Synchronizes user status by email.
+     * Updates the account status (e.g. BANNED, ACTIVE).
+     * 
+     * @param email (String): User email
+     * @param newStatus (Status): New status to set
+     * 
+     * @return void
+     */
+    public void syncUserStatus(String email, Status newStatus)
+    {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
+
+        user.setStatus(newStatus);
+        
+        userRepository.save(user);
     }
 }

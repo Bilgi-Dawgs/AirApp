@@ -3,6 +3,7 @@ package com.flightroster.user.dto;
 import java.math.BigDecimal;
 
 import com.flightroster.user.entity.Role;
+import com.flightroster.user.entity.Status;
 
 import lombok.Data;
 
@@ -16,4 +17,5 @@ public class UserRequestDto
     private String username;
     private BigDecimal balance = BigDecimal.ZERO;
     private Role role = Role.PASSENGER;
+    private Status status = Status.ACTIVE;
 }
