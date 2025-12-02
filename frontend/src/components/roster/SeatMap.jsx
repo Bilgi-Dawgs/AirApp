@@ -108,3 +108,4 @@ function LegendBox({ color, label }) {
     </div>
   );
 }
+// TODO: improve seat hover animation later
