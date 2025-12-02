@@ -78,4 +78,25 @@ public class RefreshToken
     {
         this.updatedAt = LocalDateTime.now();
     }
+
+
+    /**
+     * Custom constructor for creating a new active token.
+     * 
+     * {@summary} Initializes a refresh token for a user with a specified expiration time.
+     * Defaults 'revoked' to false and sets creation/update timestamps.
+     * 
+     * @param user (AuthUser): The owner of the token
+     * @param expiresAt (LocalDateTime): The expiration time calculated by the service
+     */
+    public RefreshToken(AuthUser user, LocalDateTime expiresAt)
+    {
+        this.user = user;
+        this.expiresAt = expiresAt;
+        
+        // Varsayılan değerleri garantiye almak için (opsiyonel, çünkü yukarıda da tanımlı)
+        this.revoked = false;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }

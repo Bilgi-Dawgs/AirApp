@@ -48,7 +48,7 @@ public class AuthUser
 
     /*
      * Hashed password of the user.
-     * Stored securely using a strong hashing algorithm (e.g., BCrypt).
+     * Stored securely using a strong hashing algorithm.
      */
     @Column(nullable = false, name = "password_hash", length = 255)
     private String passwordHash;
