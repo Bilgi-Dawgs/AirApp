@@ -44,9 +44,11 @@ services:
       DB_URL: jdbc:mysql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       DB_USERNAME_FILE: /run/secrets/user_db_user
       DB_PASSWORD_FILE: /run/secrets/user_db_pass
+      JWT_SECRET_KEY_FILE: /run/secrets/jwt_secret_key
     secrets:
       - user_db_user
       - user_db_pass
+      - jwt_secret_key
     depends_on:
       user-mysql:
         condition: service_healthy
@@ -67,6 +69,8 @@ secrets:
     file: ./secrets/user_db_user.txt
   user_db_pass:
     file: ./secrets/user_db_pass.txt
+  jwt_secret_key:
+    file: ./secrets/auth/auth_jwt_secret.txt
 
 
 # ==========================================================

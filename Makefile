@@ -50,9 +50,11 @@ rebuild: clean build run
 # ==============================
 
 user-service:
-	cd $(USER_SERVICE_PATH) && mvn clean package -DskipTests -q
+	@cd $(USER_SERVICE_PATH) && mvn clean package -DskipTests -q
+	@echo "Built user-service jar"
 	$(DOCKER_COMPOSE) $(ENV_FILE) build user-service
 
 auth-service:
-	cd $(AUTH_SERVICE_PATH) && mvn clean package -DskipTests -q
+	@cd $(AUTH_SERVICE_PATH) && mvn clean package -DskipTests -q
+	@echo "Built auth-service jar"
 	$(DOCKER_COMPOSE) $(ENV_FILE) build auth-service
