@@ -1,15 +1,7 @@
-import SeatMap from "./components/roster/SeatMap";
+import AppRouter from "./router/AppRouter";
 
 function App() {
-  const handleSeatSelect = (seat) => {
-    console.log("Selected seat:", seat);
-  };
-
-  return (
-    <div>
-      <SeatMap onSeatSelect={handleSeatSelect} />
-    </div>
-  );
+  return <AppRouter />;
 }
 
 export default App;
