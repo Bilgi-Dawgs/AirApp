@@ -14,18 +14,29 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig 
+{
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider; 
 
+    /**
+     * Configures the SecurityFilterChain bean
+     * 
+     * @param http (HttpSecurity): The HttpSecurity to configure
+     * 
+     * @throws Exception if an error occurs during configuration
+     * 
+     * @return SecurityFilterChain instance
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception 
+    {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/auth/register",
+        "/auth/register",
                     "/auth/login",
                     "/auth/health",
                     "/auth/logout",

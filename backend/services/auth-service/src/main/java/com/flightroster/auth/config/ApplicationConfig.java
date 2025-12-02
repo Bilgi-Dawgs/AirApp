@@ -19,6 +19,11 @@ public class ApplicationConfig
 {
     private final AuthUserDetailsService userDetailsService;
 
+    /**
+     * Configures the AuthenticationProvider bean
+     * 
+     * @return AuthenticationProvider instance
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() 
     {
@@ -28,12 +33,26 @@ public class ApplicationConfig
         return (authProvider);
     }
 
+    /**
+     * Configures the AuthenticationManager bean
+     * 
+     * @param config (AuthenticationConfiguration): The authentication configuration
+     * 
+     * @throws Exception if an error occurs during configuration
+     * 
+     * @return AuthenticationManager instance
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception 
     {
         return (config.getAuthenticationManager());
     }
 
+    /**
+     * Configures the PasswordEncoder bean
+     * 
+     * @return PasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() 
     {

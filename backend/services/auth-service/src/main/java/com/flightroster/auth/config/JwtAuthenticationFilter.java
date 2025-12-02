@@ -18,7 +18,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-// ===== Class =====
+// ===========================================
+//			JWT Authentication Filter
+// ===========================================
 
 @Component
 @RequiredArgsConstructor
@@ -82,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
     // ==========================================
 
     /**
-     * @brief Checks if the request path corresponds to a public endpoint
+     * Checks if the request path corresponds to a public endpoint
 	 * 
      * @param request (HttpServletRequest) The incoming HTTP request
 	 * 
@@ -104,7 +106,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
     }
 
     /**
-     * @brief Extracts the JWT token from the Authorization header
+     * Extracts the JWT token from the Authorization header
 	 * 
      * @param request (HttpServletRequest): The incoming HTTP request
 	 * 
@@ -123,7 +125,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
     }
 
     /**
-     * @brief Checks if the SecurityContext currently has no authentication
+     * Checks if the SecurityContext currently has no authentication
      * 
 	 * @return true if context is empty, false otherwise
      */
@@ -133,7 +135,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
     }
 
     /**
-     * @brief Loads user details and updates the SecurityContext
+     * Loads user details and updates the SecurityContext
 	 * 
      * @param request The incoming HTTP request (for details)
      * @param jwt The JWT token
