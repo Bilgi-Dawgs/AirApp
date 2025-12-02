@@ -17,14 +17,14 @@ public interface AuthUserRepository extends JpaRepository<AuthUser, Long>
 {
     /**
      * @brief Finds a user by email.
-     * @param email The email address of the user.
+     * @param email (String): The email address of the user.
      * @return Optional containing the user if found.
      */
     Optional<AuthUser> findByEmail(String email);
 
     /**
      * @brief Checks if a user with the given email exists.
-     * @param email The email address to check.
+     * @param email (String): The email address to check.
      * @return True if a user exists with that email, false otherwise.
      */
     boolean existsByEmail(String email);

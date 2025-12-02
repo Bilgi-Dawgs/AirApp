@@ -18,6 +18,8 @@ import com.flightroster.auth.enums.Status;
 @Component
 public class AuthMapper
 {
+	static final String DEFAULT_TOKEN_TYPE = "Bearer";
+
 	public AuthUser toEntity(String email, String passwordHash)
 	{
 		AuthUser user = new AuthUser();
@@ -27,6 +29,7 @@ public class AuthMapper
 		user.setStatus(Status.ACTIVE);
 		user.setCreatedAt(LocalDateTime.now());
 		user.setUpdatedAt(LocalDateTime.now());
+
 		return (user);
 	}
 
@@ -35,7 +38,7 @@ public class AuthMapper
 		return (AuthResponse.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
-			.tokenType("Bearer")
+			.tokenType(DEFAULT_TOKEN_TYPE)
 			.expiresIn(expiresIn)
 			.build());
 	}
