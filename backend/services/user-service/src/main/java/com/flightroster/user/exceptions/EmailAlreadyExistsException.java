@@ -1,7 +1,7 @@
-package com.flightroster.user.exception;
+package com.flightroster.user.exceptions;
 
 /**
- * @brief Thrown when trying to register an already existing email
+ * Thrown when trying to register an already existing email
  */
 public class EmailAlreadyExistsException extends RuntimeException
 {

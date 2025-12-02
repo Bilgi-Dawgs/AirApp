@@ -1,4 +1,4 @@
-package com.flightroster.user.exception;
+package com.flightroster.user.exceptions;
 
 import java.time.LocalDateTime;
 
@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * @brief Standard error response for API exceptions
+ * Standard error response for API exceptions
  */
 @Data
 @AllArgsConstructor

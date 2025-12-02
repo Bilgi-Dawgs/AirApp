@@ -1,4 +1,4 @@
-package com.flightroster.user.exception;
+package com.flightroster.user.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,14 +6,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * @brief Global exception handler for the entire user service
- * @details Ensures consistent JSON responses for all exceptions
+ * Global exception handler for the entire user service
+ * Ensures consistent JSON responses for all exceptions
  */
 @RestControllerAdvice
-public class CustomExceptionHandler
+public class GlobalExceptionHandler
 {
     /**
-     * @brief Handles UserNotFoundException
+     * Handles UserNotFoundException
+     * 
      * @return 404 NOT FOUND
      */
     @ExceptionHandler(UserNotFoundException.class)
@@ -24,7 +25,8 @@ public class CustomExceptionHandler
     }
 
     /**
-     * @brief Handles EmailAlreadyExistsException
+     * Handles EmailAlreadyExistsException
+     * 
      * @return 409 CONFLICT
      */
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -35,7 +37,8 @@ public class CustomExceptionHandler
     }
 
     /**
-     * @brief Handles all other unexpected exceptions
+     * Handles all other unexpected exceptions
+     * 
      * @return 500 INTERNAL SERVER ERROR
      */
     @ExceptionHandler(Exception.class)
