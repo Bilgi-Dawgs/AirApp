@@ -21,6 +21,7 @@ public class GlobalExceptionHandler
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex)
     {
         ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value(), null);
+
         return (new ResponseEntity<>(response, HttpStatus.NOT_FOUND));
     }
 
@@ -33,7 +34,21 @@ public class GlobalExceptionHandler
     public ResponseEntity<ErrorResponse> handleEmailConflict(EmailAlreadyExistsException ex)
     {
         ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value(), null);
+
         return (new ResponseEntity<>(response, HttpStatus.CONFLICT));
+    }
+
+    /**
+     * Handles UserValidationException
+     * 
+     * @return 400 BAD REQUEST
+     */
+    @ExceptionHandler(UserValidationException.class)
+    public ResponseEntity<Object> handleUserValidationException(UserValidationException ex) 
+    {
+        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**
