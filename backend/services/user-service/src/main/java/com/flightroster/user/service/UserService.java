@@ -10,14 +10,14 @@ import com.flightroster.user.dto.UserRequestDto;
 import com.flightroster.user.dto.UserResponseDto;
 import com.flightroster.user.dto.UserUpdateDto;
 import com.flightroster.user.entity.User;
-import com.flightroster.user.exception.EmailAlreadyExistsException;
-import com.flightroster.user.exception.UserNotFoundException;
+import com.flightroster.user.exceptions.EmailAlreadyExistsException;
+import com.flightroster.user.exceptions.UserNotFoundException;
 import com.flightroster.user.mapper.UserMapper;
 import com.flightroster.user.repository.UserRepository;
 
 /**
- * @brief Handles business logic for User management
- * @details This service layer performs CRUD operations and ensures domain consistency.
+ * Handles business logic for User management
+ * This service layer performs CRUD operations and ensures domain consistency.
  */
 @Service
 public class UserService
@@ -33,12 +33,15 @@ public class UserService
     }
 
     // ===================== CREATE =====================
-
+    
     /**
-     * @brief Creates a new user
-     * @param dto The DTO containing user creation data
-     * @return The created UserResponseDto
+     * Creates a new user
+     * 
+     * @param dto (UserRequestDto): The DTO containing user creation data
+     * 
      * @throws EmailAlreadyExistsException If the email already exists
+     * 
+     * @return The created UserResponseDto
      */
     public UserResponseDto createUser(UserRequestDto dto)
     {
@@ -54,7 +57,8 @@ public class UserService
     // ===================== READ =====================
 
     /**
-     * @brief Retrieves all users
+     * Retrieves all users
+     * 
      * @return List of all users as DTOs
      */
     public List<UserResponseDto> getAllUsers()
@@ -66,10 +70,13 @@ public class UserService
     }
 
     /**
-     * @brief Retrieves a user by ID
-     * @param id The ID of the user
-     * @return The found user as DTO
+     * Retrieves a user by ID
+     * 
+     * @param id (Long): The ID of the user
+     * 
      * @throws UserNotFoundException If user does not exist
+     * 
+     * @return The found user as DTO
      */
     public UserResponseDto getUserById(Long id)
     {
@@ -80,10 +87,13 @@ public class UserService
     }
 
     /**
-     * @brief Retrieves a user by email
-     * @param email The email of the user
-     * @return The found user as DTO
+     * Retrieves a user by email
+     * 
+     * @param email (String): The email of the user
+     * 
      * @throws UserNotFoundException If user does not exist
+     * 
+     * @return The found user as DTO
      */
     public UserResponseDto getUserByEmail(String email)
     {
@@ -96,9 +106,13 @@ public class UserService
     // ===================== UPDATE =====================
 
     /**
-     * @brief Updates user data
-     * @param id The user ID
-     * @param dto DTO containing updated values
+     * Updates user data
+     * 
+     * @param id (Long): The user ID
+     * @param dto (UserUpdateDto): DTO containing updated values
+     * 
+     * @throws UserNotFoundException If user does not exist
+     * 
      * @return Updated user DTO
      */
     public UserResponseDto updateUser(Long id, UserUpdateDto dto)
@@ -115,8 +129,13 @@ public class UserService
     // ===================== DELETE =====================
 
     /**
-     * @brief Deletes a user by ID
-     * @param id The ID of the user
+     * Deletes a user by ID
+     * 
+     * @param id (Long): The ID of the user
+     * 
+     * @throws UserNotFoundException If user does not exist
+     * 
+     * @return void
      */
     public void deleteUser(Long id)
     {
