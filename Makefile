@@ -1,9 +1,11 @@
 # ==============================
 # Global Variables
 # ==============================
+
 DOCKER_COMPOSE = docker compose
 ENV_FILE = --env-file ./env/.env
 USER_SERVICE_PATH = ./backend/services/user-service
+AUTH_SERVICE_PATH = ./backend/services/auth-service
 
 # ==============================
 # Commands
@@ -20,6 +22,7 @@ help:
 	@echo "  make clean        - Remove containers, volumes, and orphans"
 	@echo "  make rebuild      - Clean and rebuild everything"
 	@echo "  make user-service - Build only user-service module"
+	@echo "  make auth-service - Build only auth-service module"
 
 # ==============================
 # Build / Run / Clean
@@ -49,3 +52,7 @@ rebuild: clean build run
 user-service:
 	cd $(USER_SERVICE_PATH) && mvn clean package -DskipTests -q
 	$(DOCKER_COMPOSE) $(ENV_FILE) build user-service
+
+auth-service:
+	cd $(AUTH_SERVICE_PATH) && mvn clean package -DskipTests -q
+	$(DOCKER_COMPOSE) $(ENV_FILE) build auth-service
