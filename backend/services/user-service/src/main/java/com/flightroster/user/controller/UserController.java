@@ -1,9 +1,12 @@
 package com.flightroster.user.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,54 +40,88 @@ public class UserController
         this.userService = userService;
     }
 
-    // ===================== PUBLIC =====================
+    // ===================== PUBLIC ENDPOINTS =====================
 
     /**
-     * @brief Health check endpoint
+     * Health check endpoint
+     * 
+     * Access: Public
+     * 
      * @return Service health message
      */
     @GetMapping("/health")
-    public ResponseEntity<String> health()
+    public ResponseEntity<Object> health()
     {
-        return (ResponseEntity.ok("User Service is running"));
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(java.util.Map.of("status", "User Service is healthy")));
     }
 
-    // ===================== PROTECTED =====================
+    // ===================== PROTECTED ENDPOINTS =====================
 
     /**
-     * @brief Retrieves the currently authenticated user's data
+     * Retrieves the currently authenticated user's data
+     * 
+     * @param authentication (Authentication): The authentication token containing user details
+     * 
+     * Access: Protected
+     * 
+     * @return UserResponseDto of the current user
      */
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getCurrentUser()
+    public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication)
     {
-        String email = "demo@user.com"; // TODO: fetch from token
-        return (ResponseEntity.ok(userService.getUserByEmail(email)));
+        // Get user
+        String email = authentication.getName();
+        
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.getUserByEmail(email)));
     }
 
     /**
-     * @brief Updates current user's profile
+     * Updates current user's profile
+     * 
+     * @param dto (UserUpdateDto): The DTO containing update data
+     * @param authentication (Authentication): The authentication token containing user details
+     * 
+     * Access: Protected
+     * 
+     * @return Updated UserResponseDto
      */
     @PutMapping("/me")
-    public ResponseEntity<UserResponseDto> updateCurrentUser(@RequestBody UserUpdateDto dto)
+    public ResponseEntity<UserResponseDto> updateCurrentUser(@RequestBody UserUpdateDto dto, Authentication authentication)
     {
-        Long userId = 1L; // TODO: from token
-        return (ResponseEntity.ok(userService.updateUser(userId, dto)));
+        // Get user
+        String email = authentication.getName();
+        Long userId = userService.getUserByEmail(email).getId();
+        
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.updateUser(userId, dto)));
     }
 
     /**
-     * @brief Updates current user's balance
+     * Updates current user's balance
+     * 
+     * Access: Protected
+     * 
+     * @return Updated UserResponseDto
      */
     @PatchMapping("/me/balance")
-    public ResponseEntity<UserResponseDto> updateBalance(@RequestParam("balance") double balance)
+    public ResponseEntity<UserResponseDto> updateBalance(@RequestParam("balance") BigDecimal balance, Authentication authentication)
     {
-        Long userId = 1L; // TODO: from token
+        // Get user
+        String email = authentication.getName();
+        Long userId = userService.getUserByEmail(email).getId();
+
+        // Prepare DTO
         UserUpdateDto dto = new UserUpdateDto();
-        dto.setBalance(java.math.BigDecimal.valueOf(balance));
-        return (ResponseEntity.ok(userService.updateUser(userId, dto)));
+        dto.setBalance(balance);
+
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.updateUser(userId, dto)));
     }
 
     /**
-     * @brief Retrieves transaction history (placeholder)
+     * Retrieves transaction history (placeholder)
+     * 
+     * Access: Protected
+     * 
+     * @return Placeholder response
      */
     @GetMapping("/me/transactions")
     public ResponseEntity<String> getTransactions()
@@ -93,107 +130,136 @@ public class UserController
     }
 
     /**
-     * @brief Deletes current user's account
+     * Deletes current user's account
+     * 
+     * Access: Protected
+     * 
+     * @return No content response
      */
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteCurrentUser()
+    public ResponseEntity<Object> deleteCurrentUser(Authentication authentication)
     {
-        Long userId = 1L; // TODO: from token
+        // Get user
+        String email = authentication.getName();
+        Long userId = userService.getUserByEmail(email).getId();
+
+        // Prepare message
+        String message = "User with email " + email + " has been deleted.";
+
+        // Delete user
         userService.deleteUser(userId);
-        return (ResponseEntity.noContent().build());
+        
+        return (ResponseEntity.ok(java.util.Map.of("message", message)));
     }
 
     // ===================== ADMIN =====================
 
     /**
-     * @brief Retrieves all users (Admin only)
+     * Retrieves all users
+     * 
+     * Access: Admin
+     * 
+     * @return List of UserResponseDto
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAllUsers()
     {
-        return (ResponseEntity.ok(userService.getAllUsers()));
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.getAllUsers()));
     }
 
     /**
-     * @brief Retrieves a user by ID (Admin only)
+     * Retrieves a user by ID
+     * 
+     * Access: Admin
+     * 
+     * @param id (Long): User ID
+     * 
+     * @return UserResponseDto
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id)
     {
-        return (ResponseEntity.ok(userService.getUserById(id)));
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.getUserById(id)));
     }
 
     /**
-     * @brief Creates a new user (Admin only)
+     * Creates a new user
+     * 
+     * Access: Admin
+     * 
+     * @param dto (UserRequestDto): User data
+     * 
+     * @return UserResponseDto
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto)
     {
         UserResponseDto created = userService.createUser(dto);
+
         return (ResponseEntity.status(HttpStatus.CREATED).body(created));
     }
 
     /**
-     * @brief Updates a user's role (Admin only)
+     * Updates a user's role
+     * 
+     * Access: Admin
+     * 
+     * @param id (Long): User ID
+     * @param role (String): New role
+     * 
+     * @return UserResponseDto
      */
     @PutMapping("/{id}/role")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> updateUserRole(@PathVariable Long id, @RequestParam String role)
     {
         UserUpdateDto dto = new UserUpdateDto();
         dto.setRole(Enum.valueOf(Role.class, role.toUpperCase()));
-        return (ResponseEntity.ok(userService.updateUser(id, dto)));
+    
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.updateUser(id, dto)));
     }
 
     /**
-     * @brief Updates a user's status (Admin only)
+     * Updates a user's status
+     * 
+     * Access: Admin
+     * 
+     * @param id (Long): User ID
+     * @param status (String): New status
+     * 
+     * @return UserResponseDto
      */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserResponseDto> updateUserStatus(@PathVariable Long id, @RequestParam String status)
     {
         UserUpdateDto dto = new UserUpdateDto();
         dto.setStatus(Enum.valueOf(Status.class, status.toUpperCase()));
-        return (ResponseEntity.ok(userService.updateUser(id, dto)));
+
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.updateUser(id, dto)));
     }
 
     /**
-     * @brief Deletes a user by ID (Admin only)
+     * Deletes a user by ID
+     * 
+     * Access: Admin
+     * 
+     * @param id (Long): User ID
+     * 
+     * @return No content response
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Object> deleteUser(@PathVariable Long id)
     {
         userService.deleteUser(id);
-        return (ResponseEntity.noContent().build());
-    }
 
-    // ===================== INTERNAL =====================
-
-    /**
-     * @brief Synchronizes user statuses across services
-     */
-    @PatchMapping("/internal/sync-status")
-    public ResponseEntity<String> syncStatus()
-    {
-        return (ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body("User statuses synchronized"));
+        return (ResponseEntity.status(HttpStatus.ACCEPTED).body(java.util.Map.of(
+                "message", "User with ID " + id + " has been deleted."
+        )));
     }
-
-    /**
-     * @brief Synchronizes user roles across services
-     */
-    @PatchMapping("/internal/sync-role")
-    public ResponseEntity<String> syncRole()
-    {
-        return (ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body("User roles synchronized"));
-    }
-
-    /**
-     * @brief Syncs a new user from another internal service
-     */
-    @PostMapping("/internal/sync-user")
-    public ResponseEntity<UserResponseDto> syncUser(@RequestBody UserRequestDto dto)
-    {
-        UserResponseDto created = userService.createUser(dto);
-        return (ResponseEntity.status(HttpStatus.CREATED).body(created));
-    }
+    
 }
