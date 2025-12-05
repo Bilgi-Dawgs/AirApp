@@ -1,0 +1,45 @@
+:root {
+  /* colors */
+  --bg: #0f172a;          /* koyu lacivert zemin */
+  --bg-soft: rgba(15, 23, 42, 0.35);
+  --fg: #e2e8f0;          /* metin */
+  --muted: #94a3b8;
+  --card-bg: rgba(15, 23, 42, 0.35);
+  --card-border: rgba(148, 163, 184, 0.25);
+  --accent: #38bdf8;      /* açık mavi */
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --accent-contrast: #0f172a;
+  --border: rgba(255, 255, 255, 0.05);
+  --input-bg: rgba(15, 23, 42, 0.35);
+  --radius-lg: 20px;
+  --shadow-card: 0 12px 35px rgba(0,0,0,0.25);
+}
+
+
+:root.dark {
+  /* DARK MODE RENKLERİNİZ */
+  /* Arka Planınız: Koyu Gri Mavi */
+  --bg: #2a3142; 
+  
+  /* 🔥 KART ARKA PLANI: BG'den belirgin şekilde daha açık bir ton */
+  --card-bg: #3e4a60; /* Daha Açık Koyu Gri/Mavi (Login Kartı) */
+  
+  /* Metin Rengi: Kartın üzerinde okunurluğu artırmak için */
+  --text: #e2e8f0; 
+  --text-light: #94a3b8; 
+  
+  /* Input Arkaplanı: Kartın içinde daha koyu olmalı */
+  --input-bg: #1a202c; 
+  
+  /* Navbar Arkaplanı */
+  --header-bg: #111827;
+  --border: #475569; /* Koyu border rengi */
+  
+  /* Mevcut değişkenlerinizi koruyun */
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.16);
+  --accent-contrast: #020617;
+  --header-bg: #0f172a; /* Navbar arkaplanı */
+  --primary: #38bdf8; /* Buton/Link rengi */
+  --primary-hover: #0ea5e9; 
+}
