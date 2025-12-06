@@ -19,8 +19,8 @@ export const getPassenger = async (req, res) => {
 };
 
 export const getByFlight = async (req, res) => {
-  const { flightid } = req.params;
-  const list = await passengerService.getPassengersByFlight(flightid);
+  const { flightNumber } = req.params;
+  const list = await passengerService.getPassengersByFlight(flightNumber);
 
   res.status(200).json({ passengers: list || [] });
 };
@@ -95,8 +95,8 @@ export const internalList = async (req, res) => {
 };
 
 export const internalByFlight = async (req, res) => {
-  const { flightid } = req.params;
-  const list = await passengerService.getPassengersByFlight(flightid);
+  const { flightNumber } = req.params;
+  const list = await passengerService.getPassengersByFlight(flightNumber);
   res.status(200).json({ passengers: list });
 };
 

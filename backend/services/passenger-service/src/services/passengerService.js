@@ -19,8 +19,8 @@ export const getPassengerById = async (id) => {
   return prisma.passenger.findUniqueOrThrow({ where: { id: BigInt(id) } });
 };
 
-export const getPassengersByFlight = async (flightId) => {
-  return prisma.passenger.findMany({ where: { flightId: BigInt(flightId) } });
+export const getPassengersByFlight = async (flightNumber) => {
+  return prisma.passenger.findMany({ where: { flightNumber: flightNumber } });
 };
 
 export const createPassenger = async (data) => {

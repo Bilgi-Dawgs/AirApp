@@ -3,6 +3,7 @@ import * as passengerController from "../controllers/passengerController.js";
 import {
   validatePassengerInput,
   validatePassengerIdParam,
+  validateFlightNumberParam,
 } from "../middlewares/validationMiddleware.js";
 import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
@@ -11,7 +12,13 @@ const router = express.Router();
 // public
 router.get("/", passengerController.listPassengers);
 router.get("/:pid", validatePassengerIdParam, passengerController.getPassenger);
-router.get("/by-flight/:flightid", passengerController.getByFlight);
+router.get(
+  "/by-flight/:flightNumber",
+  validateFlightNumberParam,
+  passengerController.getByFlight
+);
+
+/* Unnecessary for revised plan
 
 // protected (auth service not ready yet)
 router.post(
@@ -43,6 +50,7 @@ router.delete(
   validatePassengerIdParam,
   passengerController.deletePassenger
 );
+*/
 
 // internal (service-to-service authorization logic awaits)
 router.get("/internal/list", passengerController.internalList);

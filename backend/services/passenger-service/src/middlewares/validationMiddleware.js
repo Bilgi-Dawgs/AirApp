@@ -27,6 +27,27 @@ export const validatePassengerIdParam = withValidationErrors([
     }),
 ]);
 
+export const validateFlightNumberParam = withValidationErrors([
+  param("flightNumber")
+    .notEmpty()
+    .withMessage("Flight number parameter is required")
+    .trim()
+    .toUpperCase()
+    .matches(/^[A-Z]{2}\d{4}$/)
+    .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1071)"),
+]);
+
+// Query
+export const validateFlightNumberQuery = withValidationErrors([
+  query("flightNumber")
+    .notEmpty()
+    .withMessage("Flight number query parameter is required")
+    .trim()
+    .toUpperCase()
+    .matches(/^[A-Z]{2}\d{4}$/)
+    .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1071)"),
+]);
+
 export const validatePassengerInput = withValidationErrors([
   body("firstName").notEmpty().withMessage("firstName is required"),
   body("lastName").notEmpty().withMessage("lastName is required"),

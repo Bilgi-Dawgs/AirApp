@@ -7,23 +7,27 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum ClassType {
-  economy
-  business
-  first
+enum SeatType {
+  BUSINESS
+  ECONOMY
 }
 
 model Passenger {
   id             BigInt       @id @default(autoincrement())
-  firstName      String
-  lastName       String
-  passportNumber String    @unique
-  ticketNumber   String    @unique
-  flightId       BigInt
-  seatNumber     String?
-  classType      ClassType
+  name           String
+  age            Int
+  gender         String
   nationality    String
-  checkedIn      Boolean   @default(false)
+  seatType       SeatType
+  seatNumber     String?
+  flightNumber   String
+  //  Self-Relation
+  guardianId     BigInt?
+  guardian       Passenger?  @relation("GuardianInfant", fields: [guardianId], references: [id])
+  infants        Passenger[] @relation("GuardianInfant")
+  //  Next to each other 
+  affiliatedWith BigInt[]
+  
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
