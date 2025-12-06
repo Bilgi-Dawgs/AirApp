@@ -1,0 +1,187 @@
+/* ===========================
+    AUTH PAGE – ÜSTE YAKIN & ORTALI
+=========================== */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 	 	 /* 🔥 ORTADA DEĞİL → ÜSTE YAKIN */
+    min-height: 100vh;
+    padding-top: 60px; 	 	 	 /* 🔥 Üstten boşluk */
+    padding-bottom: 40px;
+    background: var(--bg);
+}
+
+/* ===========================
+    AUTH CARD – GENİŞ & İNCE
+=========================== */
+
+.auth-card {
+   background: var(--card-bg);
+    width: 650px; 	 	 	 	 	/* 🔥 GENİŞ */
+    max-width: 95vw;
+    padding: 38px 55px; 	 	 	 	 /* 🔥 Daha ince yükseklik */
+    border-radius: 24px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+    text-align: center;
+}
+
+/* ===========================
+    HEADER
+=========================== */
+
+.auth-header {
+    margin-bottom: 20px;
+}
+
+.auth-icon {
+    font-size: 54px;
+    margin-bottom: 10px;
+}
+
+.auth-title {
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #0b1625;
+}
+
+.auth-desc {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 28px;
+}
+
+/* ===========================
+    FORM
+=========================== */
+
+.auth-form {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.auth-label {
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    font-size: 15px;
+    margin-bottom: 18px;
+}
+
+/* ===========================
+    BUTTON
+=========================== */
+
+.auth-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 17px;
+    font-weight: 700;
+    background: #4f6cff;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.auth-button:hover {
+    background: #3d55d6;
+    transform: translateY(-1px);
+}
+
+/* ===========================
+    ALT LİNKLER
+=========================== */
+
+.auth-footer-text {
+    font-size: 14px;
+    margin-top: 14px;
+    text-align: left; /* 🔥 SOL HİZALI YAPILDI */
+    color: #555;
+}
+
+.forgot-link {
+    color: #4f6cff;
+    margin-top: 8px;
+    margin-bottom: 8px; /* Altındaki linkten ayırma */
+    font-size: 14px;
+    display: block;
+    text-align: left;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.link-button {
+    border: none;
+    background: none;
+    color: #4f6cff;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+.link-button:hover {
+    text-decoration: underline;
+}
+
+/* ===========================
+    INFO BOX
+=========================== */
+
+.info-box {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #e8f5ff;
+    border: 1px solid #77a5ff;
+    color: #1f3f7b;
+    font-size: 14px;
+}
+
+/* ===========================
+    VALIDASYON & ÖZEL BİLEŞEN STİLLERİ (EKLEMELER)
+=========================== */
+
+/* Hatalı inputlar için kırmızı çerçeve (BÖLÜM C) */
+.auth-input-error {
+    border-color: #ff4d4d !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+}
+
+/* Input altındaki spesifik hata mesajı metni (BÖLÜM C) */
+.auth-error-text {
+    color: #ff4d4d;
+    font-size: 13px;
+    margin-top: 4px;
+    text-align: left;
+}
+
+/* Alt linklerdeki tıklanabilir metinler için mavi renk (BÖLÜM B) */
+.auth-link-span { 
+    color: #4f6cff; 
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.auth-link-span:hover {
+    text-decoration: underline;
+}
+
+/* Not: AuthHeader'daki gereksiz margin'i temizlemek için (global.css'te çakışan kısımlardan biri) */
+.auth-header .auth-desc {
+    margin-bottom: 28px !important;
+}
