@@ -3,7 +3,7 @@ import { CustomError } from "./customError.js";
 
 const withValidationErrors = (validators) => {
   return [
-    validators,
+    ...validators,
     (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -23,7 +23,10 @@ export const validateEmployeeIdParam = withValidationErrors([
     .bail()
     .isInt({ gt: 0 })
     .withMessage("Employee ID must be a positive integer")
-    .toInt(),
+    .bail()
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
 ]);
 
 // Flight ID
@@ -34,7 +37,9 @@ export const validateFlightIdParam = withValidationErrors([
     .bail()
     .isInt({ gt: 0 })
     .withMessage("flightId must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
 ]);
 
 // Assign Flight
@@ -45,14 +50,18 @@ export const validateAssignFlight = withValidationErrors([
     .bail()
     .isInt({ gt: 0 })
     .withMessage("Employee ID must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
   body("assignedFlightId")
     .notEmpty()
     .withMessage("assignedFlightId is required")
     .bail()
     .isInt({ gt: 0 })
     .withMessage("assignedFlightId must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
 ]);
 
 // Status Patch
@@ -63,7 +72,9 @@ export const validateStatusPatch = withValidationErrors([
     .bail()
     .isInt({ gt: 0 })
     .withMessage("Employee ID must be a positive integer")
-    .toInt(),
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
   body("status")
     .notEmpty()
     .withMessage("status is required")
@@ -91,12 +102,16 @@ export const validateEmployeeInput = withValidationErrors([
     .bail()
     .isInt({ min: 0 })
     .withMessage("experienceYears must be a non-negative integer")
+    .bail()
     .toInt(),
   body("assignedFlightId")
     .optional()
     .isInt({ gt: 0 })
     .withMessage("assignedFlightId must be a positive integer")
-    .toInt(),
+    .bail()
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
   body("status")
     .optional()
     .isIn(["AVAILABLE", "ON_DUTY", "OFF_DUTY"])
@@ -109,7 +124,10 @@ export const validateListQuery = withValidationErrors([
     .optional()
     .isInt({ gt: 0 })
     .withMessage("assignedFlightId must be a positive integer")
-    .toInt(),
+    .bail()
+    .customSanitizer((value) => {
+      return BigInt(value);
+    }),
   query("status")
     .optional()
     .isIn(["AVAILABLE", "ON_DUTY", "OFF_DUTY"])

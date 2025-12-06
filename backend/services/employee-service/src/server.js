@@ -10,6 +10,11 @@ dotenv.config();
 
 const app = express();
 
+// JSON serialization fix for BigInt values.
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 // Middlewares
 app.use(cors());
 app.use(helmet());
