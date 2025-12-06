@@ -45,4 +45,20 @@ router.put(
   flightController.replaceFlight
 );
 
+// internal
+router.get("/internal/list", flightController.internalList);
+
+router.get(
+  "/internal/:id",
+  validateFlightIdParam,
+  flightController.internalGetFlight
+);
+
+router.patch(
+  "/internal/:id/status",
+  validateFlightIdParam,
+  validateFlightStatus,
+  flightController.internalPatchStatus
+);
+
 export default router;

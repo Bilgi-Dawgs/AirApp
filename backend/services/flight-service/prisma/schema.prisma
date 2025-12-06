@@ -32,7 +32,6 @@ model AircraftType {
   seatCapacity      Int
   seatingPlanJson   Json
   maxCrewCount      Int
-  maxPassengerCount Int
   standardMenu      String
   flights           Flight[]
 }

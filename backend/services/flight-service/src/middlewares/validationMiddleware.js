@@ -4,7 +4,7 @@ import prisma from "../db/prismaClient.js";
 
 const withValidationErrors = (validateValues) => {
   return [
-    validateValues,
+    ...validateValues,
     async (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {

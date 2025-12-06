@@ -44,7 +44,6 @@ async function main() {
         seatCapacity: 180,
         seatingPlanJson: { rows: 30, layout: ["A", "B", "C", "D", "E", "F"] },
         maxCrewCount: 8,
-        maxPassengerCount: 180,
         standardMenu: "Standard European",
       },
       {
@@ -52,7 +51,6 @@ async function main() {
         seatCapacity: 189,
         seatingPlanJson: { rows: 31, layout: ["A", "B", "C", "D", "E", "F"] },
         maxCrewCount: 9,
-        maxPassengerCount: 189,
         standardMenu: "Standard Short-Haul",
       },
     ],
