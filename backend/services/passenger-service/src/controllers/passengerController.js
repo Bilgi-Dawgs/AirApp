@@ -21,10 +21,8 @@ export const getPassenger = async (req, res) => {
 export const getByFlight = async (req, res) => {
   const { flightid } = req.params;
   const list = await passengerService.getPassengersByFlight(flightid);
-  if (!list || list.length === 0) {
-    throw new CustomError("No passengers found for this flight", 404);
-  }
-  res.status(200).json({ passengers: list });
+
+  res.status(200).json({ passengers: list || [] });
 };
 
 export const addPassenger = async (req, res) => {
