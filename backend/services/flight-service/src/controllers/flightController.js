@@ -11,8 +11,8 @@ export const listFlights = async (req, res) => {
 };
 
 export const getFlight = async (req, res) => {
-  const { id } = req.params;
-  const flight = await flightService.getFlightById(id);
+  const { flightNumber } = req.params;
+  const flight = await flightService.getFlightByNumber(id);
 
   res.status(200).json({ flight });
 };

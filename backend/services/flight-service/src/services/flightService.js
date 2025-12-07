@@ -29,6 +29,19 @@ export const getFlightById = async (id) => {
   });
 };
 
+export const getFlightByNumber = async (flightNumber) => {
+  return prisma.flight.findUnique({
+    where: { flightNumber: flightNumber },
+    // include demezsen sadece FK döner veri dönmez
+    include: {
+      vehicleType: true,
+      sourceAirport: true,
+      destinationAirport: true,
+      sharedFlight: true,
+    },
+  });
+};
+
 const generateFlightNumber = async () => {
   const airlineCode = "TK"; // constant
   const lastFlight = await prisma.flight.findFirst({

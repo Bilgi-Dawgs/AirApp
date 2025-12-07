@@ -32,6 +32,28 @@ export const validateFlightIdParam = withValidationErrors([
     }),
 ]);
 
+export const validateFlightNumberParam = withValidationErrors([
+  param("flightNumber")
+    .notEmpty()
+    .withMessage("Flight number parameter is required")
+    .bail()
+    .trim()
+    .toUpperCase()
+    .matches(/^[A-Z]{2}\d{4}$/)
+    .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1920)")
+    .bail()
+    .custom(async (value) => {
+      const flight = await prisma.flight.findUnique({
+        where: { flightNumber: value },
+      });
+
+      if (!flight) {
+        throw new CustomError(`Flight with number ${value} not found`, 404);
+      }
+      return true;
+    }),
+]);
+
 export const validateFlightInput = withValidationErrors([
   body("airlineId")
     .notEmpty()

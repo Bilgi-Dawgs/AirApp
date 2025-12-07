@@ -4,6 +4,7 @@ import {
   validateFlightIdParam,
   validateFlightInput,
   validateFlightStatus,
+  validateFlightNumberParam,
 } from "../middlewares/validationMiddleware.js";
 import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
@@ -11,7 +12,13 @@ const router = express.Router();
 
 // public
 router.get("/", flightController.listFlights);
-router.get("/:id", validateFlightIdParam, flightController.getFlight);
+router.get(
+  "/:flightNumber",
+  validateFlightNumberParam,
+  flightController.getFlight
+);
+
+/* Unnecessary for revised plan
 
 // protected
 router.post(
@@ -44,6 +51,7 @@ router.put(
   validateFlightInput,
   flightController.replaceFlight
 );
+*/
 
 // internal
 router.get("/internal/list", flightController.internalList);
