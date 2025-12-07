@@ -1,37 +1,27 @@
 // frontend/src/components/common/Navbar.jsx
-import React, { useState } from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
-import Divider from "@mui/material/Divider";
+import React from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Avatar,
+  Box,
+  IconButton,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import LogoutIcon from "@mui/icons-material/Logout";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 
 // ===========================================================================
-// Temporary auth mock – will be replaced by useAuth when backend/auth is ready
+// Simple global navigation bar with a single "Bilet Yönetimi" entry
 // ===========================================================================
 
 const Navbar = () => {
+  // Temporary auth mock – will be replaced by useAuth later
   const isAuthenticated = false;
-  const user = isAuthenticated ? { name: "Mock User" } : null;
+  const user = isAuthenticated ? { name: "Bayram" } : null;
   const logout = () => {
     console.log("Logout (mock)");
-  };
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -67,72 +57,32 @@ const Navbar = () => {
         {/* Push menu items to the right */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Public menu links */}
+        {/* Main menu: Uçuş Ara | Uçuş Durumu | Bilet Yönetimi | Yardım */}
         <Button color="inherit" component={Link} to="/flights">
           Uçuş Ara
-        </Button>
-
-        <Button color="inherit" component={Link} to="/flight-roster">
-          Bilet Paneli
         </Button>
 
         <Button color="inherit" component={Link} to="/status">
           Uçuş Durumu
         </Button>
 
+        <Button color="inherit" component={Link} to="/flight-roster">
+          Bilet Yönetimi
+        </Button>
+
         <Button color="inherit" component={Link} to="/support">
           Yardım
         </Button>
 
-        {/* Right side: depends on auth state */}
+        {/* Right side: Auth area */}
         {isAuthenticated && user ? (
           <>
             <Button color="inherit" component={Link} to="/my-bookings">
               Biletlerim
             </Button>
-
-            {/* Profile dropdown */}
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle sx={{ fontSize: 30 }} />
+            <IconButton color="inherit" onClick={logout}>
+              <AccountCircle />
             </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem component={Link} to="/profile" onClick={handleClose}>
-                <AccountCircle sx={{ mr: 1 }} /> Profilim
-              </MenuItem>
-              <MenuItem component={Link} to="/my-bookings" onClick={handleClose}>
-                <ConfirmationNumberIcon sx={{ mr: 1 }} /> Biletlerim
-              </MenuItem>
-              <Divider />
-              <MenuItem
-                onClick={() => {
-                  logout();
-                  handleClose();
-                }}
-              >
-                <LogoutIcon sx={{ mr: 1 }} /> Çıkış Yap
-              </MenuItem>
-            </Menu>
           </>
         ) : (
           <>
