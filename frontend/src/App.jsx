@@ -1,29 +1,16 @@
-import React from 'react';
-import { Box } from '@mui/material';
-import AppRouter from './router/AppRouter';
-import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer'; 
+// frontend/src/App.jsx
+import React from "react";
+import Navbar from "./components/common/Navbar";
+import AppRouter from "./router/AppRouter";
 
-//==========================================================
-
-function App() {
+export default function App() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      
-      {}
+    <>
+      {/* Global top navigation bar */}
       <Navbar />
 
-      {}
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {}
-        <AppRouter />
-      </Box>
-
-      {}
-      <Footer />
-      
-    </Box>
+      {/* All page routes are rendered here */}
+      <AppRouter />
+    </>
   );
 }
-
-export default App;
