@@ -1,5 +1,5 @@
 // frontend/src/components/common/Navbar.jsx
-import React from "react";
+import React, { useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -16,16 +16,17 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 
 // ===========================================================================
+// Temporary auth mock – will be replaced by useAuth when backend/auth is ready
+// ===========================================================================
 
 const Navbar = () => {
-  // Temporary auth mock – will be replaced by useAuth later
   const isAuthenticated = false;
-  const user = isAuthenticated ? { name: "Bayram" } : null;
+  const user = isAuthenticated ? { name: "Mock User" } : null;
   const logout = () => {
     console.log("Logout (mock)");
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -66,7 +67,7 @@ const Navbar = () => {
         {/* Push menu items to the right */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* === Public menu links (requested order) === */}
+        {/* Public menu links */}
         <Button color="inherit" component={Link} to="/flights">
           Uçuş Ara
         </Button>
@@ -83,14 +84,14 @@ const Navbar = () => {
           Yardım
         </Button>
 
-        {/* === Right side: auth-dependent area === */}
+        {/* Right side: depends on auth state */}
         {isAuthenticated && user ? (
           <>
             <Button color="inherit" component={Link} to="/my-bookings">
               Biletlerim
             </Button>
 
-            {/* Profile menu */}
+            {/* Profile dropdown */}
             <IconButton
               size="large"
               aria-label="account of current user"
