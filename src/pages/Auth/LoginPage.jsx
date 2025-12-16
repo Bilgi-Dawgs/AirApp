@@ -1,150 +1,267 @@
-// src/pages/Auth/LoginPage.jsx (Son Hali)
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
-import ErrorBox from "../../components/ErrorBox";
-import useToast from "../../hooks/useToast"; 
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Alert,
+  Stack,
+  Divider,
+} from "@mui/material";
 
-const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
+// Icons
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import LockIcon from "@mui/icons-material/Lock";
+import PersonIcon from "@mui/icons-material/Person";
+import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
+import SecurityIcon from "@mui/icons-material/Security";
 
-export default function LoginPage({ noContainer = false }) {
-  const { login, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const { show } = useToast();
+// --- AUTH CONTEXT IMPORT ---
+import { useAuth } from "../../context/AuthContext";
 
-  const [email, setEmail] = useState("demo@example.com");
-  const [password, setPassword] = useState("1234"); // 🔥 MOCK ŞİFRE
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+const LoginPage = () => {
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) navigate("/profile"); 
-  }, [isAuthenticated, navigate]);
+  // Context'ten login fonksiyonunu çekiyoruz
+  const { login } = useAuth();
 
-  function validate() {
-    setEmailError("");
-    setPasswordError("");
-    let isValid = true;
+  // State
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    if (!email.trim()) {
-        setEmailError("Email address is required.");
-        isValid = false;
-    } 
-    else if (!EMAIL_REGEX.test(email)) {
-        setEmailError("Please enter a valid email address.");
-        isValid = false;
-    }
+  // Input Handle
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    setError(""); // Yazmaya başlayınca hatayı sil
+  };
 
-    if (!password) {
-        setPasswordError("Password is required.");
-        isValid = false;
-    }
+  // Login Logic
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    setErr("");
-    
-    return isValid;
-  }
+    // --- MOCK AUTHENTICATION ---
+    setTimeout(() => {
+      if (credentials.username === "admin" && credentials.password === "1234") {
+        console.log("Login Successful");
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    
-    if (!validate()) {
-        return;
-    }
-    
-    setBusy(true);
+        login("mock-token-xyz");
 
-    try {
-      await login({ email, password });
-      show("Successfully logged in!", "success");
+        navigate("/"); // Dashboard
+      } else {
+        setError("Invalid username or password. (Try: admin / 1234)");
+        setLoading(false);
+      }
+    }, 1500);
+  };
 
-    } catch (ex) {
-      setErr(ex?.response?.data?.message || "Login failed. Please check your credentials.");
-      show("Login attempt failed.", "error"); 
-      
-    } finally {
-      setBusy(false);
-    }
-  }
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundImage: "url(/deneme-1/deneme-1-md.jpg)",
+        "@media (min-width: 1440px)": {
+          backgroundImage: "url(/deneme-1/deneme-1-lg.jpg)",
+        },
+        backgroundSize: "cover",
 
-  const content = (
-    <div className="auth-card">
-      {/* HEADER */}
-      <div className="auth-header">
-        <div className="auth-icon">🔒</div>
-        <h2 className="auth-title">Login to your Account</h2> 
-        <p className="auth-desc">Enter your credentials to access your flight roster.</p>
-      </div>
+        backgroundPosition: "top center",
 
-      {/* ERROR */}
-      {err && <ErrorBox message={err} />} 
+        position: "relative",
+      }}
+    >
+      {/* Koyu Overlay */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(10, 25, 41, 0.75)",
+          backdropFilter: "blur(3px)",
+        }}
+      />
 
-      {/* FORM */}
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div>
-          <label className="auth-label" htmlFor="email">Email Address</label>
-          <input
-            className={`auth-input ${emailError ? 'auth-input-error' : ''}`}
-            type="email"
-            id="email"
-            placeholder="e.g., john.doe@mail.com"
-            value={email}
-            onChange={(e) => {
-                setEmail(e.target.value);
-                setEmailError("");
-            }}
-          />
-          {emailError && <p className="auth-error-text">{emailError}</p>}
-        </div>
+      <Container maxWidth="xs" sx={{ position: "relative", zIndex: 2 }}>
+        <Paper
+          elevation={12}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            borderTop: "5px solid #0a1929",
+          }}
+        >
+          {/* Logo / Icon */}
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              bgcolor: "#0a1929",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+            }}
+          >
+            <FlightTakeoffIcon sx={{ color: "white", fontSize: 32 }} />
+          </Box>
 
-        <div>
-          <label className="auth-label" htmlFor="password">Password</label>
-          <input
-            className={`auth-input ${passwordError ? 'auth-input-error' : ''}`}
-            type="password"
-            id="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => {
-                setPassword(e.target.value);
-                setPasswordError("");
-            }}
-          />
-          {passwordError && <p className="auth-error-text">{passwordError}</p>}
-        </div>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            color="#0a1929"
+            gutterBottom
+          >
+            Flight Roster System
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3, fontWeight: "500" }}
+          >
+            INTERNAL OPERATIONS PORTAL
+          </Typography>
 
-        <button className="auth-button" disabled={busy}>
-          {busy ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          {/* Form */}
+          <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2, fontSize: "0.85rem" }}>
+                {error}
+              </Alert>
+            )}
 
-      {/* FOOTER LINKS */}
-      <div className="auth-footer-links" style={{ textAlign: "left", marginTop: "12px" }}>
-        
-        {/* Şifremi Unuttum linki (Sol hizalı ve mavi) */}
-        <p className="forgot-link" onClick={() => navigate("/forgot-password")}>
-          Forgot Password?
-        </p>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="Personnel ID / Username"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={credentials.username}
+              onChange={handleChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-        {/* Hesap Oluştur linki (Sol hizalı ve mavi) */}
-        <p className="auth-footer-text" style={{ marginTop: "12px" }}>
-          Don't have an account? 
-          <span
-            className="auth-link-span" // Mavi rengi bu sınıf getirecek
-            onClick={() => navigate("/register")}
-            style={{ fontWeight: 600, marginLeft: "4px" }} 
-          >
-            Register
-          </span>
-        </p>
-      </div>
-    </div>
-  );
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              id="password"
+              autoComplete="current-password"
+              value={credentials.password}
+              onChange={handleChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-  if (noContainer) return content;
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                bgcolor: "#0a1929",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                textTransform: "none",
+                "&:hover": { bgcolor: "#1565c0" },
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Secure Login"
+              )}
+            </Button>
 
-  return <div className="auth-page">{content}</div>;
-}
+            <Divider sx={{ my: 2 }}>
+              <Typography variant="caption" color="text.secondary">
+                AUTHORIZED ACCESS ONLY
+              </Typography>
+            </Divider>
+
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              spacing={1}
+              sx={{ opacity: 0.7 }}
+            >
+              <SecurityIcon color="action" fontSize="small" />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                align="center"
+              >
+                This system is monitored.
+              </Typography>
+            </Stack>
+
+            <Typography
+              variant="caption"
+              display="block"
+              align="center"
+              sx={{ mt: 1, color: "#999", fontSize: "0.7rem" }}
+            >
+              v1.0 (MVP Build)
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
+};
+
+export default LoginPage;

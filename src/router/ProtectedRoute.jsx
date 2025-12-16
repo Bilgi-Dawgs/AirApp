@@ -1,17 +1,35 @@
-// src/router/ProtectedRoute.jsx
+import React from "react";
 import { Navigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
+import { Box, CircularProgress } from "@mui/material";
 
-export default function ProtectedRoute({ children, role = null }) {
-  const { isAuthenticated, user } = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-  // Giriş yapılmamış → Login sayfasına
-  if (!isAuthenticated) return <Navigate to="/" replace />;
-
-  // Eğer rol gerekiyorsa ve user.role eşleşmiyorsa → Anasayfa
-  if (role && user?.role !== role) {
-    return <Navigate to="/" replace />;
+  // 1. Durum: Kontrol devam ediyor (Sayfa yenilendiğinde buraya girer)
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f4f6f8",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
+  // 2. Durum: Kontrol bitti ve giriş yok -> Login'e at
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // 3. Durum: Giriş var -> Sayfayı göster
   return children;
-}
+};
+
+export default ProtectedRoute;
