@@ -12,9 +12,32 @@ export const listFlights = async (req, res) => {
 
 export const getFlight = async (req, res) => {
   const { flightNumber } = req.params;
-  const flight = await flightService.getFlightByNumber(id);
+  const flight = await flightService.getFlightByNumber(flightNumber);
 
   res.status(200).json({ flight });
+};
+
+// INTERNAL CONTROLLERS
+export const internalList = async (req, res) => {
+  const flights = await flightService.getAllFlights(req.query);
+  res.status(200).json({ flights });
+};
+
+export const internalGetFlight = async (req, res) => {
+  const { flightNumber } = req.params;
+  const flight = await flightService.getFlightByNumber(flightNumber);
+
+  res.status(200).json({ flight });
+};
+
+/* Dropped due to revised plan
+
+export const internalPatchStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const updatedFlight = await flightService.updateFlightById(id, { status });
+  res.status(200).json({ updatedFlight });
 };
 
 export const addFlight = async (req, res) => {
@@ -83,24 +106,4 @@ export const replaceFlight = async (req, res) => {
   });
   res.status(200).json({ replacedFlight });
 };
-
-// INTERNAL CONTROLLERS
-export const internalList = async (req, res) => {
-  const flights = await flightService.getAllFlights(req.query);
-  res.status(200).json({ flights });
-};
-
-export const internalGetFlight = async (req, res) => {
-  const { id } = req.params;
-  const flight = await flightService.getFlightById(id);
-
-  res.status(200).json({ flight });
-};
-
-export const internalPatchStatus = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  const updatedFlight = await flightService.updateFlightById(id, { status });
-  res.status(200).json({ updatedFlight });
-};
+*/

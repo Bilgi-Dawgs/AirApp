@@ -8,14 +8,29 @@ export const getAllFlights = async (filters = {}) => {
       ...(destination && { destinationAirportCode: destination }),
     },
     include: {
-      airline: true,
+      sharedFlight: true,
       sourceAirport: true,
       destinationAirport: true,
-      aircraftType: true,
+      vehicleType: true,
     },
     orderBy: { departureTime: "asc" },
   });
 };
+
+export const getFlightByNumber = async (flightNumber) => {
+  return prisma.flight.findUnique({
+    where: { flightNumber: flightNumber },
+    // eager fetch
+    include: {
+      vehicleType: true,
+      sourceAirport: true,
+      destinationAirport: true,
+      sharedFlight: true,
+    },
+  });
+};
+
+/* Dropped due to revised plan
 
 export const getFlightById = async (id) => {
   return prisma.flight.findUnique({
@@ -25,19 +40,6 @@ export const getFlightById = async (id) => {
       aircraftType: true,
       sourceAirport: true,
       destinationAirport: true,
-    },
-  });
-};
-
-export const getFlightByNumber = async (flightNumber) => {
-  return prisma.flight.findUnique({
-    where: { flightNumber: flightNumber },
-    // include demezsen sadece FK döner veri dönmez
-    include: {
-      vehicleType: true,
-      sourceAirport: true,
-      destinationAirport: true,
-      sharedFlight: true,
     },
   });
 };
@@ -89,3 +91,5 @@ export const replaceFlightById = async (id, data) => {
     data,
   });
 };
+
+*/

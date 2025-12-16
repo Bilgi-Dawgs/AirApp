@@ -18,7 +18,28 @@ router.get(
   flightController.getFlight
 );
 
-/* Unnecessary for revised plan
+// internal
+router.get("/internal/list", flightController.internalList);
+
+router.get(
+  "/internal/:flightNumber",
+  validateFlightNumberParam,
+  flightController.internalGetFlight
+);
+
+export default router;
+
+/* Dropped due to revised plan
+router.patch(
+  "/internal/:id/status",
+  validateFlightIdParam,
+  validateFlightStatus,
+  flightController.internalPatchStatus
+);
+
+export default router;
+
+/* Dropped due to revised plan
 
 // protected
 router.post(
@@ -52,21 +73,3 @@ router.put(
   flightController.replaceFlight
 );
 */
-
-// internal
-router.get("/internal/list", flightController.internalList);
-
-router.get(
-  "/internal/:id",
-  validateFlightIdParam,
-  flightController.internalGetFlight
-);
-
-router.patch(
-  "/internal/:id/status",
-  validateFlightIdParam,
-  validateFlightStatus,
-  flightController.internalPatchStatus
-);
-
-export default router;
