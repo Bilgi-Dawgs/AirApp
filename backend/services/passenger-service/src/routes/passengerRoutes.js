@@ -18,7 +18,18 @@ router.get(
   passengerController.getByFlight
 );
 
-/* Unnecessary for revised plan
+// internal (service-to-service authorization logic awaits)
+router.get("/internal/list", passengerController.internalList);
+router.get("/internal/flight/:flightid", passengerController.internalByFlight);
+
+export default router;
+
+/* Dropped due to revised plan
+router.patch(
+  "/internal/status/:pid",
+  validatePassengerIdParam,
+  passengerController.internalPatchStatus
+);
 
 // protected (auth service not ready yet)
 router.post(
@@ -51,14 +62,3 @@ router.delete(
   passengerController.deletePassenger
 );
 */
-
-// internal (service-to-service authorization logic awaits)
-router.get("/internal/list", passengerController.internalList);
-router.get("/internal/flight/:flightid", passengerController.internalByFlight);
-router.patch(
-  "/internal/status/:pid",
-  validatePassengerIdParam,
-  passengerController.internalPatchStatus
-);
-
-export default router;

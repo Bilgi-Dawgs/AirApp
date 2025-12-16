@@ -23,6 +23,8 @@ export const getPassengersByFlight = async (flightNumber) => {
   return prisma.passenger.findMany({ where: { flightNumber: flightNumber } });
 };
 
+/* dropped due to revised plan 
+
 export const createPassenger = async (data) => {
   const toCreate = {
     firstName: data.firstName,
@@ -54,3 +56,4 @@ export const checkinPassenger = async (id) => {
 export const deletePassengerById = async (id) => {
   return prisma.passenger.delete({ where: { id: BigInt(id) } });
 };
+*/
