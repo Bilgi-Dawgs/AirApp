@@ -20,7 +20,25 @@ export const getPassengerById = async (id) => {
 };
 
 export const getPassengersByFlight = async (flightNumber) => {
-  return prisma.passenger.findMany({ where: { flightNumber: flightNumber } });
+  return prisma.passenger.findMany({
+    where: { flightNumber },
+    include: {
+      infants: {
+        select: {
+          id: true,
+          name: true,
+          age: true,
+          seatNumber: true,
+        },
+      },
+      guardian: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
 };
 
 /* dropped due to revised plan 

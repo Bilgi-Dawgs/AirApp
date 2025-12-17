@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
+    "seed": "node prisma/seed.js",
     "start": "node src/server.js",
     "generate:deploy:seed:start": "npx prisma generate && npx prisma migrate dev --name init_fix && npm run seed && npm start"
   },

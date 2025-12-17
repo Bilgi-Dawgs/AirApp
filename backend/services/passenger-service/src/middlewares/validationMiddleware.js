@@ -1,4 +1,4 @@
-import { body, param, validationResult } from "express-validator";
+import { body, param, query, validationResult } from "express-validator";
 import { CustomError } from "./customError.js";
 
 const withValidationErrors = (validators) => {
