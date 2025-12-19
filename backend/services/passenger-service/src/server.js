@@ -38,6 +38,9 @@ app.use((req, res) => {
 // Error middleware
 app.use(errorHandler);
 const PORT = process.env.PORT || 8087;
+
 app.listen(PORT, () => {
-  console.log(`Flight Service running on port ${PORT}`);
+  console.log(`Passenger Service running on port ${PORT}`);
 });
+
+export default app;

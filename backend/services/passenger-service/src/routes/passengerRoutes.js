@@ -1,7 +1,6 @@
 import express from "express";
 import * as passengerController from "../controllers/passengerController.js";
 import {
-  validatePassengerInput,
   validatePassengerIdParam,
   validateFlightNumberParam,
 } from "../middlewares/validationMiddleware.js";
@@ -18,13 +17,13 @@ router.get(
   passengerController.getByFlight
 );
 
-// internal (service-to-service authorization logic awaits)
-router.get("/internal/list", passengerController.internalList);
-router.get("/internal/flight/:flightid", passengerController.internalByFlight);
-
 export default router;
 
 /* Dropped due to revised plan
+
+router.get("/internal/list", passengerController.internalList);
+router.get("/internal/flight/:flightid", passengerController.internalByFlight);
+
 router.patch(
   "/internal/status/:pid",
   validatePassengerIdParam,

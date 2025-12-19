@@ -3,10 +3,8 @@ import { CustomError } from "../middlewares/customError.js";
 
 export const listPassengers = async (req, res) => {
   const passengers = await passengerService.getAllPassengers(req.query);
-  if (!passengers) {
-    throw new CustomError("No passengers found", 404);
-  }
-  res.status(200).json({ passengers });
+
+  res.status(200).json({ passengers: passengers || [] });
 };
 
 export const getPassenger = async (req, res) => {
@@ -25,6 +23,7 @@ export const getByFlight = async (req, res) => {
   res.status(200).json({ passengers: list || [] });
 };
 
+/* Dropped due to revised plan
 // internal endpoints
 export const internalList = async (req, res) => {
   const passengers = await passengerService.getAllPassengers(req.query);
@@ -36,8 +35,6 @@ export const internalByFlight = async (req, res) => {
   const list = await passengerService.getPassengersByFlight(flightNumber);
   res.status(200).json({ passengers: list });
 };
-
-/* Dropped due to revised plan
 
 export const internalPatchStatus = async (req, res) => {
   const { pid } = req.params;

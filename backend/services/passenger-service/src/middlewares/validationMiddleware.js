@@ -20,6 +20,9 @@ export const validatePassengerIdParam = withValidationErrors([
     .notEmpty()
     .withMessage("Passenger ID is required")
     .bail()
+    .matches(/^\d+$/)
+    .withMessage("Passenger ID must be a positive integer")
+    .bail()
     .customSanitizer((value) => BigInt(value))
     .custom((value) => {
       if (value <= 0n) throw new Error("passengerId must be a positive bigint");
@@ -37,6 +40,7 @@ export const validateFlightNumberParam = withValidationErrors([
     .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1071)"),
 ]);
 
+/*
 // Query
 export const validateFlightNumberQuery = withValidationErrors([
   query("flightNumber")
@@ -86,3 +90,4 @@ export const validatePassengerInput = withValidationErrors([
     .isString()
     .withMessage("seatNumber must be a string"),
 ]);
+*/

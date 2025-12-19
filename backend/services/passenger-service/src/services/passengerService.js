@@ -2,12 +2,8 @@ import prisma from "../db/prismaClient.js";
 
 export const getAllPassengers = async (filters = {}) => {
   const where = {};
-  if (filters.flightId) where.flightId = BigInt(filters.flightId);
-  if (filters.checkedIn !== undefined) {
-    where.checkedIn =
-      typeof filters.checkedIn === "string"
-        ? filters.checkedIn === "true"
-        : Boolean(filters.checkedIn);
+  if (filters.flightNumber) {
+    where.flightNumber = filters.flightNumber;
   }
   return prisma.passenger.findMany({
     where,
