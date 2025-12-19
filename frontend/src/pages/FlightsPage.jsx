@@ -17,7 +17,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import VisibilityIcon from "@mui/icons-material/Visibility"; // Tek buton için 'Göz' ikonu
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const FlightsPage = () => {
   const navigate = useNavigate();
@@ -59,16 +59,13 @@ const FlightsPage = () => {
     roster.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Tek bir yönlendirme fonksiyonu yeterli
   const handleViewRoster = (flightNumber) => {
-    // Direkt görüntüleme sayfasına gider (Varsayılan olarak ilk sekmeyi açar)
     navigate(`/view/${flightNumber}`);
   };
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f0f2f5", py: 5 }}>
       <Container maxWidth="lg">
-        {/* --- 1. SEARCH SECTION --- */}
         <Box sx={{ mb: 5, textAlign: "center" }}>
           <Typography
             variant="h4"
@@ -125,7 +122,6 @@ const FlightsPage = () => {
           </Paper>
         </Box>
 
-        {/* --- 2. ROSTER LIST ITEMS --- */}
         <Stack spacing={2}>
           {filteredRosters.map((roster) => (
             <Paper
@@ -146,7 +142,6 @@ const FlightsPage = () => {
                 gap: { xs: 2, md: 0 },
               }}
             >
-              {/* SOL: Uçuş Bilgisi */}
               <Box
                 sx={{
                   display: "flex",
@@ -170,7 +165,6 @@ const FlightsPage = () => {
                 </Box>
               </Box>
 
-              {/* ORTA: Tarih & Araç */}
               <Box
                 sx={{
                   textAlign: { xs: "left", md: "center" },
@@ -198,7 +192,6 @@ const FlightsPage = () => {
                 </Typography>
               </Box>
 
-              {/* SAĞ: Status ve TEK BUTON */}
               <Box
                 sx={{
                   display: "flex",
@@ -222,7 +215,6 @@ const FlightsPage = () => {
                   sx={{ display: { xs: "none", md: "block" } }}
                 />
 
-                {/* SADELEŞTİRİLMİŞ TEK BUTON */}
                 <Button
                   variant="contained"
                   size="medium"
