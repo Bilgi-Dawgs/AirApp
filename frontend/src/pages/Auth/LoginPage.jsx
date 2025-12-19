@@ -95,6 +95,7 @@ const LoginPage = () => {
           bottom: 0,
           backgroundColor: "rgba(10, 25, 41, 0.75)",
           backdropFilter: "blur(3px)",
+          pointerEvents: "none",
         }}
       />
 

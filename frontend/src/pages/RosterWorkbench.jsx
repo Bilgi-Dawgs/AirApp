@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { rosterApi } from "../api/axiosInstance";
 import {
   Box,
   Typography,
@@ -106,15 +107,34 @@ const RosterWorkbench = () => {
     }
   };
 
-  const handleConfirmSave = (dbChoice) => {
-    console.log(`Saving to ${dbChoice.toUpperCase()}...`);
-    setOpenSaveDialog(false);
-    alert(`Roster successfully saved to ${dbChoice.toUpperCase()} database!`);
+  const handleConfirmSave = async (dbChoice) => {
+    try {
+      const manualPilotIds = assignedCrew.pilots.map((p) => String(p.id));
+      const manualCrewIds = assignedCrew.cabin.map((c) => String(c.id));
+
+      const requestPayload = {
+        storageType: dbChoice,
+        seniorAttendants: 1,
+        juniorAttendants: 4,
+        chefAttendants: 1,
+        manualPilotIds: manualPilotIds,
+        manualCrewIds: manualCrewIds,
+      };
+
+      setOpenSaveDialog(false);
+
+      const response = await rosterApi.generate(flightNumber, requestPayload);
+
+      if (response.status === 201 || response.status === 200) {
+        alert(`Roster successfully saved to ${dbChoice.toUpperCase()}!`);
+        navigate(`/view/${flightNumber}`);
+      }
+    } catch (err) {
+      console.error("Generation failed:", err);
+      alert("Generation failed: Check the constraints.");
+    }
   };
 
-  // =========================================================
-  // VIEW: FLIGHT SELECTION LIST (RESPONSIVE)
-  // =========================================================
   if (!flight) {
     return (
       <Box
@@ -303,7 +323,7 @@ const RosterWorkbench = () => {
     );
   }
 
-  // --- WORKBENCH VIEW --- (Aynı kaldı)
+  // --- WORKBENCH VIEW ---
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f8f9fa", pb: 10 }}>
       {/* HEADER */}

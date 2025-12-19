@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useLoaderData,
+} from "react-router-dom";
 import {
   Box,
   Container,
@@ -8,7 +13,9 @@ import {
   Tabs,
   Tab,
   IconButton,
+  Button,
 } from "@mui/material";
+import { rosterApi } from "../api/axiosInstance";
 
 // Icons
 import TableViewIcon from "@mui/icons-material/TableView";
@@ -17,56 +24,51 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FlightIcon from "@mui/icons-material/Flight";
 
-// Mock Data
-import {
-  mockAvailableCrew,
-  mockAutoAssignedPassengers,
-  mockFlightDetails,
-} from "../data/mockData";
-
-// Sub-Components (Yeni ayırdığımız dosyalar)
+// Sub-Components
 import TabularView from "../components/views/TabularView";
 import ExtendedView from "../components/views/ExtendedView";
 import PlaneView from "../components/views/PlaneView";
 
+export const rosterLoader = async ({ params }) => {
+  try {
+    const response = await rosterApi.get(params.flightNumber);
+    console.log(response.data);
+    return { roster: response.data, error: null };
+  } catch (err) {
+    return {
+      roster: null,
+      error: err.response?.status || "unknown",
+    };
+  }
+};
+
 const RosterViewPage = () => {
-  const { flightId } = useParams();
+  const { flightNumber } = useParams();
+  const { roster, error } = useLoaderData();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const flightInfo = mockFlightDetails(flightId || "UNKNOWN");
   const initialTab = location.state?.initialTab || 0;
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [mergedPeople, setMergedPeople] = useState([]);
 
-  useEffect(() => {
-    // 1. PİLOTLAR (Kokpit) - Genelde 2 kişidir ama dinamik de olabilir
-    const pilots = mockAvailableCrew.pilots.slice(0, 2).map((p, index) => ({
-      ...p,
-      type: "Pilot",
-      role: p.seniority,
-      seat: `PLT-${index + 1}`,
-    }));
+  if (error === "404") {
+    return (
+      <Container sx={{ mt: 10, textAlign: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          Flight Roster Not Found
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => navigate(`/workbench/${flightNumber}`)}
+        >
+          Go to Workbench to Generate
+        </Button>
+      </Container>
+    );
+  }
 
-    // 2. KABİN EKİBİ (TAMAMEN DİNAMİK)
-    // mock verisindeki herkesi alıyoruz, sayı sınırı yok.
-    const cabin = mockAvailableCrew.cabin.map((c, index) => ({
-      ...c,
-      type: "Cabin Crew",
-      role: c.type,
-      // Koltuk numarası yerine sanal bir ID atıyoruz
-      seat: `CREW-${index + 1}`,
-    }));
-
-    // 3. YOLCULAR
-    const pax = mockAutoAssignedPassengers.map((p) => ({
-      ...p,
-      type: "Passenger",
-      role: p.class,
-    }));
-
-    setMergedPeople([...pilots, ...cabin, ...pax]);
-  }, []);
+  if (!roster) return <Typography>Loading...</Typography>;
+  const { flightInfoSnapshot } = roster;
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f4f6f8", pb: 10 }}>
@@ -110,11 +112,22 @@ const RosterViewPage = () => {
                   fontSize: { xs: "1.2rem", md: "1.5rem" },
                 }}
               >
-                <FlightIcon color="primary" /> Flight {flightId}
+                <FlightIcon color="primary" /> Flight {flightNumber}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Vehicle: <b>{flightInfo.vehicle}</b> | Date:{" "}
-                <b>{flightInfo.date}</b>
+                <b>
+                  {flightInfoSnapshot.sourceCity} (
+                  {flightInfoSnapshot.sourceAirportCode})
+                </b>{" "}
+                ➔
+                <b>
+                  {" "}
+                  {flightInfoSnapshot.destinationCity} (
+                  {flightInfoSnapshot.destinationAirportCode})
+                </b>
+                <br />
+                Flight: <b>{flightInfoSnapshot.vehicleModel}</b> | Date:{" "}
+                <b>{new Date(roster.flightDate).toLocaleString()}</b>
               </Typography>
             </Box>
           </Box>
@@ -153,9 +166,11 @@ const RosterViewPage = () => {
         </Paper>
 
         <Box sx={{ minHeight: 400 }}>
-          {activeTab === 0 && <TabularView people={mergedPeople} />}
-          {activeTab === 1 && <PlaneView people={mergedPeople} />}
-          {activeTab === 2 && <ExtendedView people={mergedPeople} />}
+          {activeTab === 0 && <TabularView people={roster.persons} />}
+          {activeTab === 1 && (
+            <PlaneView people={roster.persons} vehicle={flightInfoSnapshot} />
+          )}
+          {activeTab === 2 && <ExtendedView people={roster.persons} />}
         </Box>
       </Container>
     </Box>
