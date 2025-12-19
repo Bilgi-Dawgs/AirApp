@@ -8,6 +8,7 @@ import RosterWorkbench from "../pages/RosterWorkbench";
 import RosterViewPage from "../pages/RosterViewPage";
 
 import RosterViewPage, { loader as viewLoader } from "../pages/RosterViewPage";
+import { flightsLoader } from "./pages/FlightsPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
             <FlightSearchPage />
           </ProtectedRoute>
         ),
+        loader: flightsLoader,
       },
       {
         path: "workbench/:flightNumber?",
@@ -47,7 +49,7 @@ const router = createBrowserRouter([
             <RosterViewPage />
           </ProtectedRoute>
         ),
-        loader: viewLoader, // Loader burada bağlandı
+        loader: viewLoader,
       },
     ],
   },
