@@ -1,11 +1,6 @@
 import express from "express";
 import * as flightController from "../controllers/flightController.js";
-import {
-  validateFlightIdParam,
-  validateFlightInput,
-  validateFlightStatus,
-  validateFlightNumberParam,
-} from "../middlewares/validationMiddleware.js";
+import { validateFlightNumberParam } from "../middlewares/validationMiddleware.js";
 import { verifyJWT, hasRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -18,6 +13,10 @@ router.get(
   flightController.getFlight
 );
 
+export default router;
+
+/* Dropped due to revised plan
+
 // internal
 router.get("/internal/list", flightController.internalList);
 
@@ -27,9 +26,6 @@ router.get(
   flightController.internalGetFlight
 );
 
-export default router;
-
-/* Dropped due to revised plan
 router.patch(
   "/internal/:id/status",
   validateFlightIdParam,

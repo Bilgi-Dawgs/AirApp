@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
     "seed": "node prisma/seed.js",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
@@ -29,7 +30,11 @@
     "morgan": "^1.10.1"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.16",
     "nodemon": "^3.1.10",
-    "prisma": "^6.18.0"
+    "prisma": "^6.18.0",
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.16",
+    "vitest-mock-extended": "^3.1.0"
   }
 }

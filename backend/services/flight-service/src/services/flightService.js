@@ -13,7 +13,7 @@ export const getAllFlights = async (filters = {}) => {
       destinationAirport: true,
       vehicleType: true,
     },
-    orderBy: { departureTime: "asc" },
+    orderBy: { dateTime: "asc" },
   });
 };
 

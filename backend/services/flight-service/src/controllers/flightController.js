@@ -14,8 +14,14 @@ export const getFlight = async (req, res) => {
   const { flightNumber } = req.params;
   const flight = await flightService.getFlightByNumber(flightNumber);
 
+  if (!flight) {
+    throw new CustomError(`Flight with number ${flightNumber} not found`, 404);
+  }
+
   res.status(200).json({ flight });
 };
+
+/* Dropped due to revised plan
 
 // INTERNAL CONTROLLERS
 export const internalList = async (req, res) => {
@@ -29,8 +35,6 @@ export const internalGetFlight = async (req, res) => {
 
   res.status(200).json({ flight });
 };
-
-/* Dropped due to revised plan
 
 export const internalPatchStatus = async (req, res) => {
   const { id } = req.params;

@@ -1,6 +1,5 @@
 import { body, param, validationResult } from "express-validator";
 import { CustomError } from "./customError.js";
-import prisma from "../db/prismaClient.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -16,6 +15,18 @@ const withValidationErrors = (validateValues) => {
   ];
 };
 
+export const validateFlightNumberParam = withValidationErrors([
+  param("flightNumber")
+    .notEmpty()
+    .withMessage("Flight number parameter is required")
+    .bail()
+    .trim()
+    .toUpperCase()
+    .matches(/^[A-Z]{2}\d{4}$/)
+    .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1920)"),
+]);
+
+/* Dropped due to revised plan
 export const validateFlightIdParam = withValidationErrors([
   param("id")
     .notEmpty()
@@ -29,28 +40,6 @@ export const validateFlightIdParam = withValidationErrors([
       if (!flight) {
         throw new CustomError(`Flight with ID ${value} not found`, 404);
       }
-    }),
-]);
-
-export const validateFlightNumberParam = withValidationErrors([
-  param("flightNumber")
-    .notEmpty()
-    .withMessage("Flight number parameter is required")
-    .bail()
-    .trim()
-    .toUpperCase()
-    .matches(/^[A-Z]{2}\d{4}$/)
-    .withMessage("Flight number must be in 'AANNNN' format (e.g., TK1920)")
-    .bail()
-    .custom(async (value) => {
-      const flight = await prisma.flight.findUnique({
-        where: { flightNumber: value },
-      });
-
-      if (!flight) {
-        throw new CustomError(`Flight with number ${value} not found`, 404);
-      }
-      return true;
     }),
 ]);
 
@@ -117,3 +106,4 @@ export const validateFlightStatus = withValidationErrors([
     .isIn(["scheduled", "ongoing", "delayed", "cancelled", "completed"])
     .withMessage("Invalid flight status value"),
 ]);
+*/
