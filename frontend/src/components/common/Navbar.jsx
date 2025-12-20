@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-// --- MUI COMPONENTS ---
 import {
   AppBar,
   Toolbar,
@@ -15,25 +14,21 @@ import {
   Divider,
 } from "@mui/material";
 
-// --- MUI ICONS ---
 import {
   AccountCircle,
   Logout as LogoutIcon,
   Dashboard as DashboardIcon,
   Search as SearchIcon,
   AdminPanelSettings as AdminPanelSettingsIcon,
-  Menu as MenuIcon, // Hamburger Menü İkonu
+  Menu as MenuIcon,
 } from "@mui/icons-material";
 
 import { useAuth } from "../../context/AuthContext";
-
-//===========================================================================
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
 
-  // --- STATE 1: KULLANICI PROFİL MENÜSÜ (Sağ Taraf) ---
   const [anchorElUser, setAnchorElUser] = useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -50,7 +45,6 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  // --- STATE 2: MOBİL NAVİGASYON MENÜSÜ (Sol Taraf - Hamburger) ---
   const [anchorElNav, setAnchorElNav] = useState(null);
 
   const handleOpenNavMenu = (event) => {
@@ -71,9 +65,6 @@ const Navbar = () => {
       }}
     >
       <Toolbar>
-        {/* =========================================================
-            1. MOBİL MENÜ İKONU (SADECE MOBİLDE GÖRÜNÜR)
-           ========================================================= */}
         {isAuthenticated && (
           <Box sx={{ flexGrow: 0, display: { xs: "flex", md: "none" }, mr: 1 }}>
             <IconButton
@@ -93,7 +84,6 @@ const Navbar = () => {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: "block", md: "none" } }}
             >
-              {/* Mobil Menü İçeriği */}
               <MenuItem component={Link} to="/" onClick={handleCloseNavMenu}>
                 <DashboardIcon sx={{ mr: 1, color: "text.secondary" }} />{" "}
                 Dashboard
@@ -110,9 +100,6 @@ const Navbar = () => {
           </Box>
         )}
 
-        {/* =========================================================
-            2. LOGO ALANI (HER ZAMAN GÖRÜNÜR)
-           ========================================================= */}
         <Link
           to="/"
           style={{
@@ -141,7 +128,7 @@ const Navbar = () => {
               sx={{
                 fontWeight: "bold",
                 lineHeight: 1,
-                fontSize: { xs: "1rem", md: "1.25rem" }, // Mobilde yazı biraz küçülsün
+                fontSize: { xs: "1rem", md: "1.25rem" },
               }}
             >
               Flight Roster
@@ -161,9 +148,6 @@ const Navbar = () => {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* =========================================================
-            3. MASAÜSTÜ NAVİGASYON (SADECE PC'DE GÖRÜNÜR)
-           ========================================================= */}
         {isAuthenticated && (
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, mr: 3 }}>
             <Button
@@ -189,9 +173,6 @@ const Navbar = () => {
           </Box>
         )}
 
-        {/* =========================================================
-            4. KULLANICI PROFİLİ (SAĞ TARAF)
-           ========================================================= */}
         {isAuthenticated ? (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Typography
@@ -230,9 +211,6 @@ const Navbar = () => {
                 </Typography>
               </Box>
               <Divider />
-
-              {/* Mobilde Profil Menüsü İçinde de Linkler Olabilir (Opsiyonel) */}
-              {/* Ama Hamburger menüye koyduğumuz için burası sadece profil işlemleri kalsa daha temiz olur */}
 
               <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
                 <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} /> Logout

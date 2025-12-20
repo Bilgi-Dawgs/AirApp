@@ -14,6 +14,12 @@ import { workbenchLoader } from "../pages/RosterWorkbench";
 import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
+  // login
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  // Main
   {
     path: "/",
     element: <MainLayout />,

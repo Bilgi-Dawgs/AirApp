@@ -31,7 +31,7 @@ const PERSON_TYPES = {
 };
 
 const getAvatarLetter = (name) => {
-  return name && name.length > 0 ? name.charAt(0) : "?";
+  return name && name.trim().length > 0 ? name.trim().charAt(0) : "?";
 };
 
 const EmptyRow = ({ colSpan, msg }) => (
@@ -44,11 +44,12 @@ const EmptyRow = ({ colSpan, msg }) => (
   </TableRow>
 );
 
+// --- 1. PILOT TABLE ---
 const PilotTable = ({ pilots }) => (
   <TableContainer
     component={Paper}
     elevation={2}
-    sx={{ mb: 4, borderRadius: 2 }}
+    sx={{ mb: 0, borderRadius: 2, height: "100%" }}
   >
     <Box
       sx={{
@@ -132,11 +133,12 @@ const PilotTable = ({ pilots }) => (
   </TableContainer>
 );
 
+// --- 2. CREW TABLE ---
 const CrewTable = ({ crewList }) => (
   <TableContainer
     component={Paper}
     elevation={2}
-    sx={{ mb: 4, borderRadius: 2 }}
+    sx={{ mb: 0, borderRadius: 2, height: "100%" }}
   >
     <Box
       sx={{
@@ -226,6 +228,7 @@ const CrewTable = ({ crewList }) => (
   </TableContainer>
 );
 
+// --- 3. PASSENGER TABLE ---
 const PassengerTable = ({ passengers, parentMap }) => (
   <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
     <Box
@@ -248,8 +251,8 @@ const PassengerTable = ({ passengers, parentMap }) => (
           <TableCell sx={{ fontWeight: "bold" }}>Seat</TableCell>
           <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
           <TableCell sx={{ fontWeight: "bold" }}>Class</TableCell>
-          <TableCell sx={{ fontWeight: "bold" }}>Special Status</TableCell>
-          <TableCell sx={{ fontWeight: "bold" }}>Affiliation</TableCell>
+          <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+          <TableCell sx={{ fontWeight: "bold" }}>Traveling With</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -267,7 +270,7 @@ const PassengerTable = ({ passengers, parentMap }) => (
 
           const parentName = pax.parentId
             ? parentMap.get(pax.parentId) || pax.parentId
-            : "-";
+            : null;
 
           let partnerName = null;
           if (pax.affiliatedWith && pax.affiliatedWith.length > 0) {
@@ -286,7 +289,7 @@ const PassengerTable = ({ passengers, parentMap }) => (
                   />
                 ) : (
                   <Typography variant="caption" color="text.disabled">
-                    No Seat
+                    -
                   </Typography>
                 )}
               </TableCell>
@@ -312,19 +315,17 @@ const PassengerTable = ({ passengers, parentMap }) => (
                     sx={{ height: 20 }}
                   />
                 ) : (
-                  <Typography variant="caption" color="text.disabled">
-                    -
-                  </Typography>
+                  "-"
                 )}
               </TableCell>
               <TableCell>
                 {pax.isInfant ? (
-                  <Typography variant="caption">
-                    With: <b>{parentName}</b>
+                  <Typography variant="caption" display="block">
+                    Parent: <b>{parentName || "-"}</b>
                   </Typography>
-                ) : pax.affiliatedWith && pax.affiliatedWith.length > 0 ? (
+                ) : partnerName ? (
                   <Typography variant="caption" color="text.secondary">
-                    {partnerName}
+                    With: <b>{partnerName}</b>
                   </Typography>
                 ) : (
                   <Typography variant="caption" color="text.disabled">
@@ -343,6 +344,7 @@ const PassengerTable = ({ passengers, parentMap }) => (
   </TableContainer>
 );
 
+// --- MAIN LAYOUT ---
 const ExtendedView = ({ people = [] }) => {
   const pilots = people.filter((p) => p.type === PERSON_TYPES.PILOT);
   const cabinCrew = people.filter((p) => p.type === PERSON_TYPES.CABIN_CREW);
@@ -354,22 +356,33 @@ const ExtendedView = ({ people = [] }) => {
       if (p.personId && p.name) {
         map.set(p.personId, p.name);
       }
+      if (p.id) {
+        map.set(String(p.id), p.name);
+      }
     });
     return map;
   }, [people]);
 
   return (
     <Box sx={{ width: "100%", py: 2 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          {/* Props ile veri geçişi */}
+      <Grid container spacing={3} alignItems="stretch">
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{ display: "flex", flexDirection: "column" }}
+        >
           <PilotTable pilots={pilots} />
         </Grid>
-        <Grid item xs={12}>
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{ display: "flex", flexDirection: "column" }}
+        >
           <CrewTable crewList={cabinCrew} />
         </Grid>
         <Grid item xs={12}>
-          {/* Map prop olarak geçildi */}
           <PassengerTable passengers={passengers} parentMap={parentMap} />
         </Grid>
       </Grid>

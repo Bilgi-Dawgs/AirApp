@@ -73,19 +73,8 @@ const StatCard = ({ title, value, icon, color }) => (
 const HomePage = () => {
   const navigate = useNavigate();
 
-  // --- MOCK DATA ---
-  const stats = {
-    totalRosters: 12,
-    activeFlights: 45,
-    totalCrew: 84,
-    totalPassengers: 1240,
-  };
-
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
-      {/* =========================================================
-          1. HERO BANNER (GÜNCELLENDİ)
-      ========================================================= */}
       <Box
         sx={{
           backgroundImage: "url(/deneme-1/deneme-1-md.jpg)",
@@ -94,12 +83,8 @@ const HomePage = () => {
           },
           backgroundSize: "cover",
 
-          // --- DEĞİŞİKLİK BURADA ---
-          // 1. Odağı yukarı kaydır (Uçağın üst kısmı görünsün)
           backgroundPosition: "top center",
-          // 2. Banner boyunu biraz daha uzat
           minHeight: { xs: "450px", md: "600px" },
-          // -------------------------
 
           display: "flex",
           alignItems: "center",
@@ -167,53 +152,9 @@ const HomePage = () => {
         </Container>
       </Box>
 
-      {/* =========================================================
-          2. STATISTICS SECTION 
-      ========================================================= */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard
-              title="Active Rosters"
-              value={stats.totalRosters}
-              icon={<AssignmentIcon fontSize="large" />}
-              color="#007FFF"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard
-              title="Flights Found"
-              value={stats.activeFlights}
-              icon={<FlightIcon fontSize="large" />}
-              color="#ed6c02"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard
-              title="Ready Crew"
-              value={stats.totalCrew}
-              icon={<AirlineSeatReclineExtraIcon fontSize="large" />}
-              color="#2e7d32"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard
-              title="Passengers"
-              value={stats.totalPassengers}
-              icon={<GroupIcon fontSize="large" />}
-              color="#9c27b0"
-            />
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* =========================================================
-          3. SYSTEM OVERVIEW
-      ========================================================= */}
       <Box sx={{ backgroundColor: "#fff", py: 8, borderTop: "1px solid #eee" }}>
         <Container maxWidth="lg">
           <Grid container spacing={6} alignItems="center">
-            {/* Sol Taraf: Açıklama Metni */}
             <Grid item xs={12} md={7}>
               <Typography
                 variant="overline"

@@ -6,7 +6,6 @@ import { Box, CircularProgress } from "@mui/material";
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  // 1. Durum: Kontrol devam ediyor (Sayfa yenilendiğinde buraya girer)
   if (loading) {
     return (
       <Box
@@ -23,12 +22,10 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // 2. Durum: Kontrol bitti ve giriş yok -> Login'e at
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Durum: Giriş var -> Sayfayı göster
   return children;
 };
 
