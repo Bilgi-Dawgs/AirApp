@@ -269,6 +269,12 @@ const PassengerTable = ({ passengers, parentMap }) => (
             ? parentMap.get(pax.parentId) || pax.parentId
             : "-";
 
+          let partnerName = null;
+          if (pax.affiliatedWith && pax.affiliatedWith.length > 0) {
+            const partnerId = pax.affiliatedWith[0];
+            partnerName = parentMap.get(partnerId) || `ID: ${partnerId}`;
+          }
+
           return (
             <TableRow key={pax.personId || `pax-${index}`} hover>
               <TableCell>
@@ -318,7 +324,7 @@ const PassengerTable = ({ passengers, parentMap }) => (
                   </Typography>
                 ) : pax.affiliatedWith && pax.affiliatedWith.length > 0 ? (
                   <Typography variant="caption" color="text.secondary">
-                    Group ID: {pax.affiliatedWith[0]}
+                    {partnerName}
                   </Typography>
                 ) : (
                   <Typography variant="caption" color="text.disabled">

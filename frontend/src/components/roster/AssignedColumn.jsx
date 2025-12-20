@@ -97,7 +97,10 @@ const AssignedColumn = ({ assignedCrew, onUnassign }) => {
                     boxShadow: 1,
                   }}
                 >
-                  <ListItemText primary={crew.name} secondary={crew.type} />
+                  <ListItemText
+                    primary={crew.name}
+                    secondary={crew.attendantType}
+                  />
                   <IconButton
                     edge="end"
                     color="error"

@@ -38,7 +38,6 @@ const PoolColumn = ({ pool, flightVehicle, onAssign }) => {
         <PersonIcon /> Personnel Pool
       </Typography>
 
-      {/* GÜNCELLEME: overflowX: "hidden" ekledik ki yatay bar çıkmasın */}
       <Box
         sx={{
           flexGrow: 1,
@@ -72,7 +71,6 @@ const PoolColumn = ({ pool, flightVehicle, onAssign }) => {
                 </Avatar>
               </ListItemAvatar>
 
-              {/* GÜNCELLEME: Metin sığmazsa ... koysun diye noWrap ekliyoruz */}
               <ListItemText
                 primary={
                   <Typography variant="body2" fontWeight="bold" noWrap>
@@ -121,7 +119,6 @@ const PoolColumn = ({ pool, flightVehicle, onAssign }) => {
                 </Avatar>
               </ListItemAvatar>
 
-              {/* GÜNCELLEME: Burada da noWrap ekliyoruz */}
               <ListItemText
                 primary={
                   <Typography variant="body2" fontWeight="bold" noWrap>
@@ -130,7 +127,7 @@ const PoolColumn = ({ pool, flightVehicle, onAssign }) => {
                 }
                 secondary={
                   <Typography variant="caption" noWrap>
-                    {crew.type}
+                    {crew.attendantType}
                   </Typography>
                 }
               />

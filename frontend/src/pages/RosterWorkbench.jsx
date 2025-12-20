@@ -152,8 +152,10 @@ const RosterWorkbench = () => {
       return restrictions.includes(targetVehicle);
     });
 
-    const pilotsNeeded = flight.requiredPilots ?? 2;
-    const cabinNeeded = flight.requiredAttendants ?? 4;
+    console.log(flight);
+
+    const pilotsNeeded = flight.vehicleType.requiredPilots ?? 2;
+    const cabinNeeded = flight.vehicleType.requiredAttendants ?? 4;
 
     const takePilots = Math.max(0, pilotsNeeded - assignedCrew.pilots.length);
     const takeCabin = Math.max(0, cabinNeeded - assignedCrew.cabin.length);
