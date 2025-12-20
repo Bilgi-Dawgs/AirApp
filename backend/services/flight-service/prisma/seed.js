@@ -3,17 +3,18 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("✈️  Flight Service seeding started...");
+  console.log("Flight Service seeding started...");
 
-  // CLEANUP
-  await prisma.sharedFlight.deleteMany();
-  await prisma.flight.deleteMany();
-  await prisma.vehicleType.deleteMany();
-  await prisma.airport.deleteMany();
+  try {
+    await prisma.sharedFlight.deleteMany();
+    await prisma.flight.deleteMany();
+    await prisma.vehicleType.deleteMany();
+    await prisma.airport.deleteMany();
+    console.log("Old data cleared.");
+  } catch (error) {
+    console.log("Cleanup skipped (Database might be empty).");
+  }
 
-  console.log("🧹 Old data cleared.");
-
-  // AIRPORTS
   await prisma.airport.createMany({
     data: [
       {
@@ -42,18 +43,21 @@ async function main() {
         country: "Germany",
       },
       { code: "HND", name: "Haneda Airport", city: "Tokyo", country: "Japan" },
+      {
+        code: "CDG",
+        name: "Charles de Gaulle",
+        city: "Paris",
+        country: "France",
+      },
     ],
   });
 
-  // VEHICLE TYPES
-
-  // BOEING 737
   const b737 = await prisma.vehicleType.create({
     data: {
       modelName: "BOEING_737",
-      totalSeats: 162,
+      totalSeats: 120,
       requiredPilots: 2,
-      requiredAttendants: 4,
+      requiredAttendants: 5,
       menu: ["Chicken Sandwich", "Cheese Sandwich", "Water", "Tea"],
       seatPlan: {
         business: {
@@ -62,77 +66,102 @@ async function main() {
           seatsPerRow: 4,
         },
         economy: {
-          range: [4, 28],
-          layout: "3-3",
-          seatsPerRow: 6,
+          range: [4, 30],
+          layout: "2-2",
+          seatsPerRow: 4,
         },
       },
     },
   });
 
-  // AIRBUS A320
   const a320 = await prisma.vehicleType.create({
     data: {
       modelName: "AIRBUS_A320",
-      totalSeats: 150,
+      totalSeats: 112,
       requiredPilots: 2,
-      requiredAttendants: 4,
+      requiredAttendants: 5,
       menu: ["Pasta", "Meatballs", "Soda", "Coffee"],
       seatPlan: {
-        business: { rows: [1, 2], layout: "2-2", seatsPerRow: 4 },
-        economy: { range: [3, 26], layout: "3-3", seatsPerRow: 6 },
+        business: {
+          rows: [1, 2],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
+        economy: {
+          range: [3, 28],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
       },
     },
   });
 
-  // AIRBUS A330
   const a330 = await prisma.vehicleType.create({
     data: {
       modelName: "AIRBUS_A330",
-      totalSeats: 250,
+      totalSeats: 160,
       requiredPilots: 3,
-      requiredAttendants: 8,
+      requiredAttendants: 9,
       menu: ["Steak", "Fish", "Vegan Platter", "Wine"],
       seatPlan: {
-        business: { rows: [1, 2, 3, 4, 5], layout: "2-2-2", seatsPerRow: 6 },
-        economy: { range: [6, 35], layout: "2-4-2", seatsPerRow: 8 },
+        business: {
+          rows: [1, 2, 3, 4, 5],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
+        economy: {
+          range: [6, 40],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
       },
     },
   });
 
-  // BOEING 777
   const b777 = await prisma.vehicleType.create({
     data: {
       modelName: "BOEING_777",
-      totalSeats: 350,
+      totalSeats: 200,
       requiredPilots: 3,
-      requiredAttendants: 10,
+      requiredAttendants: 16,
       menu: ["Beef Stroganoff", "Chicken Curry", "Sushi", "Champagne"],
       seatPlan: {
-        business: { rows: [1, 2, 3, 4, 5, 6], layout: "2-2-2", seatsPerRow: 6 },
-        economy: { range: [10, 45], layout: "3-4-3", seatsPerRow: 10 },
+        business: {
+          rows: [1, 2, 3, 4, 5, 6, 7, 8],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
+        economy: {
+          range: [10, 51],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
       },
     },
   });
 
-  // BOEING 787
   const b787 = await prisma.vehicleType.create({
     data: {
       modelName: "BOEING_787",
-      totalSeats: 240,
+      totalSeats: 160,
       requiredPilots: 3,
-      requiredAttendants: 7,
+      requiredAttendants: 9,
       menu: ["Gourmet Burger", "Salmon", "Salad", "Juice"],
       seatPlan: {
-        business: { rows: [1, 2, 3, 4], layout: "1-2-1", seatsPerRow: 4 }, // Herkes koridora erişir
-        economy: { range: [5, 30], layout: "3-3-3", seatsPerRow: 9 },
+        business: {
+          rows: [1, 2, 3, 4, 5],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
+        economy: {
+          range: [6, 40],
+          layout: "2-2",
+          seatsPerRow: 4,
+        },
       },
     },
   });
 
-  // FLIGHTS
-
-  // IST -> JFK
   await prisma.flight.create({
     data: {
       flightNumber: "TK1920",
@@ -141,11 +170,10 @@ async function main() {
       distanceKm: 8000,
       sourceAirportCode: "IST",
       destinationAirportCode: "JFK",
-      vehicleTypeId: b777.id,
+      vehicleTypeId: a320.id,
     },
   });
 
-  // IST -> ESB
   await prisma.flight.create({
     data: {
       flightNumber: "TK1071",
@@ -158,7 +186,6 @@ async function main() {
     },
   });
 
-  // Uçuş 3: LHR -> IST
   await prisma.flight.create({
     data: {
       flightNumber: "TK2023",
@@ -171,7 +198,6 @@ async function main() {
     },
   });
 
-  // HND -> IST
   await prisma.flight.create({
     data: {
       flightNumber: "TK0050",
@@ -184,8 +210,18 @@ async function main() {
     },
   });
 
-  // SHARED FLIGHT
-  // FRA -> IST (Lufthansa ile ortak)
+  await prisma.flight.create({
+    data: {
+      flightNumber: "TK1821",
+      dateTime: new Date("2025-11-17T16:00:00Z"),
+      durationMinutes: 210,
+      distanceKm: 2200,
+      sourceAirportCode: "CDG",
+      destinationAirportCode: "IST",
+      vehicleTypeId: a320.id,
+    },
+  });
+
   const sharedFlight = await prisma.flight.create({
     data: {
       flightNumber: "TK5005",
@@ -207,12 +243,12 @@ async function main() {
     },
   });
 
-  console.log("✅ Flight Service seeding completed.");
+  console.log("Flight Service seeding completed successfully.");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Seeding failed:", e);
     process.exit(1);
   })
   .finally(async () => {
