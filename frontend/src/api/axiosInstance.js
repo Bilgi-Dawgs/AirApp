@@ -6,7 +6,7 @@ const api = axios.create({
 
 export const rosterApi = {
   get: (flightNumber) => api.get(`/rosters/${flightNumber}`),
-
+  list: () => api.get("/rosters"),
   generate: (flightNumber, config) =>
     api.post(`/rosters/${flightNumber}`, config),
 };

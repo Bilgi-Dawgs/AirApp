@@ -1,27 +1,18 @@
-import React from "react";
+import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
-import { Outlet } from "react-router-dom";
 
-//==========================================================
-
-function App() {
+const MainLayout = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {}
       <Navbar />
-
-      {}
       <Box component="main" sx={{ flexGrow: 1 }}>
-        {}
         <Outlet />
       </Box>
-
-      {}
       <Footer />
     </Box>
   );
-}
+};
 
-export default App;
+export default MainLayout;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { rosterApi } from "../api/axiosInstance";
+import { useParams, useNavigate, useLoaderData } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -17,51 +16,100 @@ import {
   Chip,
   Card,
   CardContent,
-  Grid,
-  Divider,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 
+// Icons
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import FlightIcon from "@mui/icons-material/Flight";
 import SaveIcon from "@mui/icons-material/Save";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import AirlinesIcon from "@mui/icons-material/Airlines";
-
+import { rosterApi } from "../api/axiosInstance";
 import PoolColumn from "../components/roster/PoolColumn";
 import AssignedColumn from "../components/roster/AssignedColumn";
 import PassengerColumn from "../components/roster/PassengerColumn";
 import SaveRosterDialog from "../components/roster/SaveRosterDialog";
 
-import {
-  mockAvailableCrew,
-  mockAutoAssignedPassengers,
-  mockFlightDetails,
-  mockAvailableFlights,
-} from "../data/mockData";
+// --- LOADER ---
+export const workbenchLoader = async () => {
+  try {
+    const response = await rosterApi.get("available-flights");
+    return { availableFlights: response.data || [], error: null };
+  } catch (err) {
+    console.error("Flights fetch error:", err);
+    return {
+      availableFlights: [],
+      error: "Could not load flights. System might be offline.",
+    };
+  }
+};
 
 const RosterWorkbench = () => {
   const { flightNumber } = useParams();
   const navigate = useNavigate();
 
+  const loaderData = useLoaderData() || {};
+  const availableFlights = loaderData.availableFlights || [];
+  const loadError = loaderData.error;
+
+  // --- STATE ---
   const [flight, setFlight] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [assignedCrew, setAssignedCrew] = useState({ pilots: [], cabin: [] });
   const [passengers, setPassengers] = useState([]);
-  const [pool, setPool] = useState(mockAvailableCrew);
+  const [pool, setPool] = useState({ pilots: [], cabin: [] });
   const [openSaveDialog, setOpenSaveDialog] = useState(false);
 
+  // --- INIT & DATA FETCHING ---
   useEffect(() => {
+    const fetchFlightDetails = async (flightData) => {
+      setLoadingDetails(true);
+      try {
+        const [crewRes, passRes] = await Promise.all([
+          rosterApi.get(`pool/${flightData.flightNumber}`),
+          rosterApi.get(`passengers/${flightData.flightNumber}`),
+        ]);
+
+        const rawCrew = crewRes.data || [];
+        const mappedCrew = rawCrew.map((p) => ({
+          ...p,
+          id: p.personId,
+        }));
+
+        const pilots = mappedCrew.filter((p) => p.type === "PILOT");
+        const cabin = mappedCrew.filter((p) => p.type === "CABIN_CREW");
+
+        setPool({ pilots, cabin });
+        setPassengers(passRes.data || []);
+      } catch (err) {
+        console.error("Error fetching crew/passengers:", err);
+        setPool({ pilots: [], cabin: [] });
+        setPassengers([]);
+      } finally {
+        setLoadingDetails(false);
+      }
+    };
+
     if (flightNumber) {
-      setFlight(mockFlightDetails(flightNumber));
-      setAssignedCrew({ pilots: [], cabin: [] });
-      setPool(mockAvailableCrew);
-      setPassengers(mockAutoAssignedPassengers);
+      const selectedWrapper = availableFlights.find(
+        (item) => item.flightNumber === flightNumber
+      );
+
+      if (selectedWrapper) {
+        setFlight(selectedWrapper);
+        setAssignedCrew({ pilots: [], cabin: [] });
+        fetchFlightDetails(selectedWrapper);
+      } else {
+        setFlight(null);
+      }
     } else {
       setFlight(null);
     }
-  }, [flightNumber]);
+  }, [flightNumber, availableFlights]);
 
+  // --- HANDLERS ---
   const handleSelectFlight = (id) => {
     navigate(`/workbench/${id}`);
   };
@@ -84,45 +132,101 @@ const RosterWorkbench = () => {
 
   const handleAutoAssign = () => {
     if (!flight) return;
-    const validPilots = pool.pilots.filter((p) => p.vehicle === flight.vehicle);
-    const pilotsNeeded = 2 - assignedCrew.pilots.length;
-    const cabinNeeded = 4 - assignedCrew.cabin.length;
-    const takePilots = pilotsNeeded > 0 ? pilotsNeeded : 0;
-    const takeCabin = cabinNeeded > 0 ? cabinNeeded : 0;
+
+    const targetVehicle = (flight.vehicleType?.modelName || "").trim();
+
+    // ---- PILOTS ----
+    const validPilots = pool.pilots.filter((p) => {
+      if (!p.pilotVehicleRestriction) return false;
+      return p.pilotVehicleRestriction === targetVehicle;
+    });
+
+    // ---- CABIN ----
+    const validCabin = pool.cabin.filter((c) => {
+      const restrictions = c.vehicleRestrictions;
+
+      if (!Array.isArray(restrictions) || restrictions.length === 0) {
+        return false;
+      }
+
+      return restrictions.includes(targetVehicle);
+    });
+
+    const pilotsNeeded = flight.requiredPilots ?? 2;
+    const cabinNeeded = flight.requiredAttendants ?? 4;
+
+    const takePilots = Math.max(0, pilotsNeeded - assignedCrew.pilots.length);
+    const takeCabin = Math.max(0, cabinNeeded - assignedCrew.cabin.length);
+
+    if (takePilots === 0 && takeCabin === 0) {
+      alert("Crew already complete.");
+      return;
+    }
 
     if (
-      (takePilots > 0 && validPilots.length > 0) ||
-      (takeCabin > 0 && pool.cabin.length > 0)
+      (takePilots > 0 && validPilots.length < takePilots) ||
+      (takeCabin > 0 && validCabin.length < takeCabin)
     ) {
-      const newPilots = validPilots.slice(0, takePilots);
-      const newCabin = pool.cabin.slice(0, takeCabin);
-      setAssignedCrew((prev) => ({
-        pilots: [...prev.pilots, ...newPilots],
-        cabin: [...prev.cabin, ...newCabin],
-      }));
-      setPool((prev) => ({
-        pilots: prev.pilots.filter((p) => !newPilots.includes(p)),
-        cabin: prev.cabin.filter((p) => !newCabin.includes(p)),
-      }));
+      alert("Not enough compatible crew found.");
+      return;
     }
+
+    const newPilots = validPilots.slice(0, takePilots);
+    const newCabin = validCabin.slice(0, takeCabin);
+
+    setAssignedCrew((prev) => ({
+      pilots: [...prev.pilots, ...newPilots],
+      cabin: [...prev.cabin, ...newCabin],
+    }));
+
+    const assignedIds = [
+      ...newPilots.map((p) => p.id),
+      ...newCabin.map((c) => c.id),
+    ];
+
+    setPool((prev) => ({
+      pilots: prev.pilots.filter((p) => !assignedIds.includes(p.id)),
+      cabin: prev.cabin.filter((c) => !assignedIds.includes(c.id)),
+    }));
   };
 
   const handleConfirmSave = async (dbChoice) => {
+    const hasSeniorPilot = assignedCrew.pilots.some(
+      (p) => p.seniority === "SENIOR"
+    );
+
+    if (!hasSeniorPilot) {
+      alert("At least one SENIOR pilot must be assigned.");
+      return;
+    }
+
+    // CABIN BREAKDOWN
+    const seniorAttendants = assignedCrew.cabin.filter(
+      (c) => c.seniority === "SENIOR"
+    ).length;
+
+    const juniorAttendants = assignedCrew.cabin.filter(
+      (c) => c.seniority === "JUNIOR" || c.seniority === "TRAINEE"
+    ).length;
+
+    const chefAttendants = assignedCrew.cabin.filter(
+      (c) => c.attendantType === "CHIEF"
+    ).length;
+
     try {
       const manualPilotIds = assignedCrew.pilots.map((p) => String(p.id));
       const manualCrewIds = assignedCrew.cabin.map((c) => String(c.id));
 
       const requestPayload = {
         storageType: dbChoice,
-        seniorAttendants: 1,
-        juniorAttendants: 4,
-        chefAttendants: 1,
-        manualPilotIds: manualPilotIds,
-        manualCrewIds: manualCrewIds,
+        seniorAttendants,
+        juniorAttendants,
+        chefAttendants,
+        manualPilotIds,
+        manualCrewIds,
       };
 
       setOpenSaveDialog(false);
-
       const response = await rosterApi.generate(flightNumber, requestPayload);
 
       if (response.status === 201 || response.status === 200) {
@@ -131,10 +235,23 @@ const RosterWorkbench = () => {
       }
     } catch (err) {
       console.error("Generation failed:", err);
-      alert("Generation failed: Check the constraints.");
+
+      const backendErrorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data ||
+        "Unknown validation error";
+
+      const finalMessage =
+        typeof backendErrorMsg === "object"
+          ? JSON.stringify(backendErrorMsg)
+          : backendErrorMsg;
+
+      alert(`Generation failed: ${finalMessage}`);
     }
   };
 
+  // --- VIEW RENDERING (UNCHANGED UI) ---
   if (!flight) {
     return (
       <Box
@@ -162,7 +279,6 @@ const RosterWorkbench = () => {
               fontWeight="bold"
               color="#0a1929"
               gutterBottom
-              sx={{ fontSize: { xs: "1.5rem", md: "2.125rem" } }}
             >
               Start New Roster
             </Typography>
@@ -170,8 +286,13 @@ const RosterWorkbench = () => {
               Select a scheduled flight to begin crew assignment.
             </Typography>
           </Box>
+          {loadError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {loadError}
+            </Alert>
+          )}
 
-          {/* --- DESKTOP VIEW (TABLE) --- */}
+          {/* FLIGHT SELECTION TABLE */}
           <Box sx={{ display: { xs: "none", md: "block" } }}>
             <TableContainer sx={{ maxHeight: 400 }}>
               <Table stickyHeader>
@@ -195,127 +316,107 @@ const RosterWorkbench = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {mockAvailableFlights.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      hover
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
-                      <TableCell>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <FlightTakeoffIcon color="primary" fontSize="small" />
-                          <Typography fontWeight="bold">{row.id}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="500">
-                          {row.route}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {row.date}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={row.vehicle}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          endIcon={<ArrowForwardIcon />}
-                          onClick={() => handleSelectFlight(row.id)}
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 20,
-                            bgcolor: "#0a1929",
-                          }}
-                        >
-                          Select
-                        </Button>
+                  {availableFlights.length === 0 && !loadError && (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No flights available.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
+                  {availableFlights.map((row) => {
+                    const raw = row;
+                    const flightId = row.flightNumber ?? `flight-${index}`;
+                    const src = raw.sourceAirportCode || "?";
+                    const dest = raw.destinationAirportCode || "?";
+                    const vehicle =
+                      raw.vehicleType?.modelName?.replace("_", " ") ||
+                      "Aircraft";
+                    const dateStr = raw.dateTime
+                      ? new Date(raw.dateTime).toLocaleDateString()
+                      : "N/A";
+
+                    return (
+                      <TableRow key={flightId} hover>
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <FlightTakeoffIcon
+                              color="primary"
+                              fontSize="small"
+                            />
+                            <Typography fontWeight="bold">
+                              {flightId}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="500">
+                            {src} - {dest}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {dateStr}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={vehicle}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Button
+                            variant="contained"
+                            size="small"
+                            endIcon={<ArrowForwardIcon />}
+                            onClick={() => handleSelectFlight(flightId)}
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: 20,
+                              bgcolor: "#0a1929",
+                            }}
+                          >
+                            Select
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
-
-          {/* --- MOBILE VIEW (CARDS) --- */}
+          {/* MOBILE VIEW */}
           <Box sx={{ display: { xs: "block", md: "none" } }}>
+            {availableFlights.length === 0 && (
+              <Typography align="center">No flights.</Typography>
+            )}
             <Stack spacing={2}>
-              {mockAvailableFlights.map((row) => (
-                <Card
-                  key={row.id}
-                  variant="outlined"
-                  sx={{ borderRadius: 2, bgcolor: "#fafafa" }}
-                >
-                  <CardContent sx={{ pb: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1,
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              {availableFlights.map((row) => {
+                const raw = row;
+                return (
+                  <Card key={raw.flightNumber} variant="outlined">
+                    <CardContent>
+                      <Typography fontWeight="bold">
+                        {raw.flightNumber}
+                      </Typography>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={() => handleSelectFlight(raw.flightNumber)}
+                        sx={{ mt: 2 }}
                       >
-                        <FlightTakeoffIcon color="primary" />
-                        <Typography variant="h6" fontWeight="bold">
-                          {row.id}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        label={row.vehicle}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
-
-                    <Divider sx={{ my: 1 }} />
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mb: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <AirlinesIcon fontSize="small" color="action" />
-                        <Typography variant="body2" fontWeight="bold">
-                          {row.route}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <CalendarMonthIcon fontSize="small" color="action" />
-                        <Typography variant="caption">{row.date}</Typography>
-                      </Box>
-                    </Box>
-
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={() => handleSelectFlight(row.id)}
-                      sx={{ bgcolor: "#0a1929", borderRadius: 2 }}
-                    >
-                      Select Flight
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                        Select
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </Stack>
           </Box>
         </Paper>
@@ -323,10 +424,9 @@ const RosterWorkbench = () => {
     );
   }
 
-  // --- WORKBENCH VIEW ---
+  // --- WORKBENCH UI ---
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f8f9fa", pb: 10 }}>
-      {/* HEADER */}
       <Paper
         sx={{
           px: { xs: 2, md: 4 },
@@ -352,10 +452,12 @@ const RosterWorkbench = () => {
             </Avatar>
             <Box>
               <Typography variant="h6" fontWeight="bold">
-                Building Roster: {flight.id}
+                Building Roster: {flight.flightNumber}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Vehicle: <b>{flight.vehicle}</b> | Min 2 Pilots, Min 4 Cabin
+                Vehicle:{" "}
+                <b>{flight.vehicleType?.modelName?.replace("_", " ")}</b> |{" "}
+                {flight.sourceAirportCode} - {flight.destinationAirportCode}
               </Typography>
             </Box>
           </Box>
@@ -370,6 +472,7 @@ const RosterWorkbench = () => {
               startIcon={<AutoFixHighIcon />}
               onClick={handleAutoAssign}
               sx={{ flex: 1, whiteSpace: "nowrap" }}
+              disabled={loadingDetails}
             >
               Auto Assign
             </Button>
@@ -378,7 +481,7 @@ const RosterWorkbench = () => {
               color="success"
               startIcon={<SaveIcon />}
               onClick={() => setOpenSaveDialog(true)}
-              disabled={assignedCrew.pilots.length < 2}
+              disabled={assignedCrew.pilots.length < 2 || loadingDetails}
               sx={{ flex: 1, whiteSpace: "nowrap" }}
             >
               Save Roster
@@ -387,39 +490,46 @@ const RosterWorkbench = () => {
         </Box>
       </Paper>
 
-      {/* COLUMNS */}
-      <Box
-        sx={{ px: { xs: 2, md: 3 }, width: "100%", boxSizing: "border-box" }}
-      >
+      {loadingDetails ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <CircularProgress />
+          <Typography sx={{ ml: 2, mt: 1 }}>
+            Fetching crew & passengers...
+          </Typography>
+        </Box>
+      ) : (
         <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 3,
-            width: "100%",
-            alignItems: "stretch",
-          }}
+          sx={{ px: { xs: 2, md: 3 }, width: "100%", boxSizing: "border-box" }}
         >
-          <Box sx={{ flex: 3, minWidth: 0 }}>
-            <PoolColumn
-              pool={pool}
-              flightVehicle={flight.vehicle}
-              onAssign={handleAssign}
-            />
-          </Box>
-          <Box sx={{ flex: 4, minWidth: 0 }}>
-            <AssignedColumn
-              assignedCrew={assignedCrew}
-              onUnassign={handleUnassign}
-            />
-          </Box>
-          <Box sx={{ flex: 5, minWidth: 0 }}>
-            <PassengerColumn passengers={passengers} />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 3,
+              width: "100%",
+              alignItems: "stretch",
+            }}
+          >
+            <Box sx={{ flex: 3, minWidth: 0 }}>
+              <PoolColumn
+                pool={pool}
+                flightVehicle={flight.vehicleType?.modelName}
+                onAssign={handleAssign}
+              />
+            </Box>
+            <Box sx={{ flex: 4, minWidth: 0 }}>
+              <AssignedColumn
+                assignedCrew={assignedCrew}
+                onUnassign={handleUnassign}
+              />
+            </Box>
+            <Box sx={{ flex: 5, minWidth: 0 }}>
+              <PassengerColumn passengers={passengers} />
+            </Box>
           </Box>
         </Box>
-      </Box>
+      )}
 
-      {/* DIALOG */}
       <SaveRosterDialog
         open={openSaveDialog}
         onClose={() => setOpenSaveDialog(false)}

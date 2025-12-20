@@ -1,21 +1,22 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 import LoginPage from "../pages/Auth/LoginPage";
 import Dashboard from "../pages/HomePage";
 import FlightSearchPage from "../pages/FlightsPage";
 import RosterWorkbench from "../pages/RosterWorkbench";
 import RosterViewPage from "../pages/RosterViewPage";
+import MainLayout from "../MainLayout";
 
-import RosterViewPage, { loader as viewLoader } from "../pages/RosterViewPage";
-import { flightsLoader } from "./pages/FlightsPage";
+import { rosterLoader as viewLoader } from "../pages/RosterViewPage";
+import { flightsLoader } from "../pages/FlightsPage";
+import { workbenchLoader } from "../pages/RosterWorkbench";
 
 import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomeLayout />,
+    element: <MainLayout />,
     children: [
       {
         index: true,
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
             <RosterWorkbench />
           </ProtectedRoute>
         ),
+        loader: workbenchLoader,
       },
       {
         path: "view/:flightNumber",
@@ -55,8 +57,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-const AppRouter = () => {
-  return <RouterProvider router={router} />;
-};
-
-export default AppRouter;
+export default router;

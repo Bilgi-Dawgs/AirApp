@@ -22,13 +22,19 @@ import { rosterApi } from "../api/axiosInstance";
 // --- LOADER ---
 export const flightsLoader = async () => {
   try {
-    const response = await rosterApi.get("/available-flights");
-    return { flights: response.data, error: null };
+    const response = await rosterApi.list();
+
+    console.log("STATUS:", response.status);
+    console.log("HEADERS:", response.headers);
+    console.log("DATA TYPE:", typeof response.data);
+    console.log("DATA RAW:", response.data);
+
+    return { rosters: response.data, error: null };
   } catch (err) {
-    console.error("Flight list fetch error:", err);
+    console.error("Roster list fetch error:", err);
     return {
-      flights: [],
-      error: "Could not load flights. System might be offline.",
+      rosters: [],
+      error: "Could not load rosters. System might be offline.",
     };
   }
 };
@@ -37,18 +43,18 @@ const FlightsPage = () => {
   const navigate = useNavigate();
 
   const loaderData = useLoaderData() || {};
-  const flights = loaderData.flights || [];
+  const rosters = loaderData.rosters || [];
   const error = loaderData.error || null;
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFlights = useMemo(() => {
+  const filteredRosters = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
-    return flights.filter((flight) => {
-      const fNum = flight.flightNumber || "";
+    return rosters.filter((roster) => {
+      const fNum = roster.flightNumber || "";
       return fNum.toLowerCase().includes(searchLower);
     });
-  }, [flights, searchTerm]);
+  }, [rosters, searchTerm]);
 
   const handleManageRoster = (flightIdentifier) => {
     navigate(`/view/${flightIdentifier}`);
@@ -64,10 +70,10 @@ const FlightsPage = () => {
             color="#0a1929"
             sx={{ mb: 1 }}
           >
-            Flight Operations
+            Active Rosters
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Select a scheduled flight to view its roster or create a new one.
+            Select a scheduled flight to view its roster.
           </Typography>
 
           <Paper
@@ -108,9 +114,9 @@ const FlightsPage = () => {
         )}
 
         <Stack spacing={2}>
-          {filteredFlights.map((flight) => {
+          {filteredRosters.map((roster) => {
             const stableKey =
-              flight.id || `${flight.flightNumber}-${flight.flightDate}`;
+              roster.id || `${roster.flightNumber}-${roster.dateTime}`;
 
             return (
               <Paper
@@ -144,11 +150,11 @@ const FlightsPage = () => {
                   </Box>
                   <Box>
                     <Typography variant="h6" fontWeight="bold" color="#0a1929">
-                      {flight.flightNumber || "Unknown Flight"}
+                      {roster.flightNumber || "Unknown Flight"}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {flight.sourceAirportCode || "IST"} ➔{" "}
-                      {flight.destinationAirportCode || "DEST"}
+                      {roster.sourceAirportCode || "IST"} ➔{" "}
+                      {roster.destinationAirportCode || "DEST"}
                     </Typography>
                   </Box>
                 </Box>
@@ -158,8 +164,8 @@ const FlightsPage = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <CalendarMonthIcon fontSize="small" color="action" />
                       <Typography variant="body2" fontWeight="500">
-                        {flight.flightDate
-                          ? new Date(flight.flightDate).toLocaleDateString(
+                        {roster.dateTime
+                          ? new Date(roster.dateTime).toLocaleDateString(
                               "tr-TR"
                             )
                           : "Scheduled"}
@@ -168,7 +174,7 @@ const FlightsPage = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <AirplanemodeActiveIcon fontSize="small" color="action" />
                       <Typography variant="caption" color="text.secondary">
-                        {flight.vehicleModel || "Unknown Aircraft"}
+                        {roster.vehicleType?.modelName || "Unknown Aircraft"}
                       </Typography>
                     </Box>
                   </Stack>
@@ -184,7 +190,7 @@ const FlightsPage = () => {
                   <Button
                     variant="contained"
                     endIcon={<ArrowForwardIcon />}
-                    onClick={() => handleManageRoster(flight.flightNumber)}
+                    onClick={() => handleManageRoster(roster.flightNumber)}
                     sx={{
                       backgroundColor: "#0a1929",
                       textTransform: "none",
@@ -200,13 +206,13 @@ const FlightsPage = () => {
             );
           })}
 
-          {!error && filteredFlights.length === 0 && (
+          {!error && filteredRosters.length === 0 && (
             <Box sx={{ textAlign: "center", py: 5, opacity: 0.7 }}>
               <FlightTakeoffIcon sx={{ fontSize: 60, color: "#ccc", mb: 2 }} />
               <Typography variant="h6" color="text.secondary">
-                {flights.length === 0
-                  ? "No scheduled flights found."
-                  : `No flights matching "${searchTerm}"`}
+                {rosters.length === 0
+                  ? "No active rosters found."
+                  : `No rosters matching "${searchTerm}"`}
               </Typography>
             </Box>
           )}
