@@ -23,16 +23,13 @@ import PersonIcon from "@mui/icons-material/Person";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import SecurityIcon from "@mui/icons-material/Security";
 
-// --- AUTH CONTEXT IMPORT ---
 import { useAuth } from "../../context/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  // Context'ten login fonksiyonunu çekiyoruz
   const { login } = useAuth();
 
-  // State
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
@@ -41,27 +38,24 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Input Handle
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
-    setError(""); // Yazmaya başlayınca hatayı sil
+    setError("");
   };
 
-  // Login Logic
   const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // --- MOCK AUTHENTICATION ---
     setTimeout(() => {
       if (credentials.username === "admin" && credentials.password === "1234") {
         console.log("Login Successful");
 
         login("mock-token-xyz");
 
-        navigate("/"); // Dashboard
+        navigate("/");
       } else {
-        setError("Invalid username or password. (Try: admin / 1234)");
+        setError("Invalid username or password.");
         setLoading(false);
       }
     }, 1500);
@@ -85,7 +79,6 @@ const LoginPage = () => {
         position: "relative",
       }}
     >
-      {/* Koyu Overlay */}
       <Box
         sx={{
           position: "absolute",
@@ -112,7 +105,6 @@ const LoginPage = () => {
             borderTop: "5px solid #0a1929",
           }}
         >
-          {/* Logo / Icon */}
           <Box
             sx={{
               width: 64,
@@ -145,7 +137,6 @@ const LoginPage = () => {
             INTERNAL OPERATIONS PORTAL
           </Typography>
 
-          {/* Form */}
           <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
             {error && (
               <Alert severity="error" sx={{ mb: 2, fontSize: "0.85rem" }}>

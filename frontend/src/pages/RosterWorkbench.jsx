@@ -135,47 +135,70 @@ const RosterWorkbench = () => {
 
     const targetVehicle = (flight.vehicleType?.modelName || "").trim();
 
-    // ---- PILOTS ----
-    const validPilots = pool.pilots.filter((p) => {
-      if (!p.pilotVehicleRestriction) return false;
-      return p.pilotVehicleRestriction === targetVehicle;
-    });
+    // ================ PILOTS =================
+    const validPilots = pool.pilots.filter(
+      (p) => p.pilotVehicleRestriction === targetVehicle
+    );
 
-    // ---- CABIN ----
-    const validCabin = pool.cabin.filter((c) => {
-      const restrictions = c.vehicleRestrictions;
-
-      if (!Array.isArray(restrictions) || restrictions.length === 0) {
-        return false;
-      }
-
-      return restrictions.includes(targetVehicle);
-    });
-
-    console.log(flight);
+    const seniorPilots = validPilots.filter((p) => p.seniority === "SENIOR");
+    const juniorPilots = validPilots.filter((p) => p.seniority === "JUNIOR");
 
     const pilotsNeeded = flight.vehicleType.requiredPilots ?? 2;
-    const cabinNeeded = flight.vehicleType.requiredAttendants ?? 4;
 
-    const takePilots = Math.max(0, pilotsNeeded - assignedCrew.pilots.length);
-    const takeCabin = Math.max(0, cabinNeeded - assignedCrew.cabin.length);
-
-    if (takePilots === 0 && takeCabin === 0) {
-      alert("Crew already complete.");
+    if (seniorPilots.length === 0 || juniorPilots.length === 0) {
+      alert("At least 1 senior and 1 junior pilot required.");
       return;
     }
 
-    if (
-      (takePilots > 0 && validPilots.length < takePilots) ||
-      (takeCabin > 0 && validCabin.length < takeCabin)
-    ) {
-      alert("Not enough compatible crew found.");
+    let newPilots = [];
+    newPilots.push(seniorPilots[0], juniorPilots[0]);
+
+    const remainingPilots = pilotsNeeded - newPilots.length;
+    if (remainingPilots > 0) {
+      const rest = validPilots.filter(
+        (p) => !newPilots.some((np) => np.id === p.id)
+      );
+      newPilots.push(...rest.slice(0, remainingPilots));
+    }
+
+    // ================ CABIN =================
+    const validCabin = pool.cabin.filter(
+      (c) =>
+        Array.isArray(c.vehicleRestrictions) &&
+        c.vehicleRestrictions.includes(targetVehicle)
+    );
+
+    const cabinNeeded = flight.vehicleType.requiredAttendants ?? 5;
+
+    const chiefs = validCabin
+      .filter((c) => c.attendantType === "CHIEF")
+      .slice(0, 4); // max 4
+    const regulars = validCabin
+      .filter((c) => c.attendantType !== "CHIEF")
+      .slice(0, 16); // max 16
+
+    if (chiefs.length < 1 || regulars.length < 4) {
+      alert(
+        "Not enough cabin crew: minimum 1 chief and 4 regular attendants required."
+      );
       return;
     }
 
-    const newPilots = validPilots.slice(0, takePilots);
-    const newCabin = validCabin.slice(0, takeCabin);
+    let newCabin = [];
+    newCabin.push(...chiefs.slice(0, Math.min(cabinNeeded, chiefs.length)));
 
+    const regularToAdd = Math.min(
+      cabinNeeded - newCabin.length,
+      regulars.length
+    );
+    newCabin.push(...regulars.slice(0, regularToAdd));
+
+    if (newCabin.length < cabinNeeded) {
+      alert("Not enough cabin crew to meet required attendants.");
+      return;
+    }
+
+    // ================ STATE UPDATE =================
     setAssignedCrew((prev) => ({
       pilots: [...prev.pilots, ...newPilots],
       cabin: [...prev.cabin, ...newCabin],
