@@ -1,0 +1,67 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Airport {
+  code      String   @id @db.Char(3) 
+  name      String
+  city      String
+  country   String
+
+  departingFlights Flight[] @relation("DepartureAirport")
+  arrivingFlights  Flight[] @relation("ArrivalAirport")
+}
+
+model VehicleType {
+  id                 BigInt      @id @default(autoincrement())
+  modelName          String   @unique 
+  totalSeats         Int
+  seatPlan           Json     
+  requiredPilots     Int      
+  requiredAttendants Int
+  
+  menu               String[] 
+  flights            Flight[]
+}
+
+// Main Table
+model Flight {
+  flightNumber       String   @id @unique 
+  // For pilot selection
+  dateTime           DateTime
+  durationMinutes    Int
+  distanceKm         Int      
+
+  sourceAirportCode       String
+  sourceAirport           Airport @relation("DepartureAirport", fields: [sourceAirportCode], references: [code])
+  
+  destinationAirportCode  String
+  destinationAirport      Airport @relation("ArrivalAirport", fields: [destinationAirportCode], references: [code])
+
+  vehicleTypeId      BigInt
+  vehicleType        VehicleType @relation(fields: [vehicleTypeId], references: [id])
+
+  sharedFlight       SharedFlight?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+
+model SharedFlight {
+  id                  BigInt     @id @default(autoincrement())
+  flightNumber        String  @unique
+  flight              Flight  @relation(fields: [flightNumber], references: [flightNumber])
+
+  // Partner 
+  partnerCompany      String  
+  partnerFlightNumber String 
+  
+  // Aktarma 
+  connectingFlight    String? 
+}
