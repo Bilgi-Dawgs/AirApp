@@ -2,16 +2,87 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("Seeding process started...");
+const firstNames = [
+  "Ali",
+  "Veli",
+  "Ayşe",
+  "Fatma",
+  "John",
+  "Jane",
+  "Hans",
+  "Helga",
+  "Pierre",
+  "Sophie",
+  "Michael",
+  "Sarah",
+  "David",
+  "Emma",
+  "Lars",
+  "Elena",
+  "Marco",
+  "Giulia",
+  "Hiroshi",
+  "Yuki",
+  "Mehmet",
+  "Zeynep",
+  "Can",
+  "Elif",
+  "Ozan",
+  "Selin",
+];
+const lastNames = [
+  "Yilmaz",
+  "Demir",
+  "Kaya",
+  "Celik",
+  "Smith",
+  "Doe",
+  "Mueller",
+  "Schmidt",
+  "Martin",
+  "Dubois",
+  "Johnson",
+  "Brown",
+  "Jensen",
+  "Nielsen",
+  "Rossi",
+  "Bianchi",
+  "Tanaka",
+  "Sato",
+  "Ivanov",
+  "Popov",
+  "Ozturk",
+  "Aydin",
+  "Yildiz",
+];
+const nationalities = [
+  "TR",
+  "US",
+  "DE",
+  "FR",
+  "UK",
+  "DK",
+  "IT",
+  "JP",
+  "RU",
+  "ES",
+];
 
+function getRandomElement(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function main() {
   await prisma.passenger.deleteMany();
 
+  // --- 1. TK1920 (DETAYLI SENARYOLAR) ---
   const FLIGHT_TK = "TK1920";
-  const FLIGHT_LH = "TK1542";
+  console.log(`Seeding specific scenarios for ${FLIGHT_TK}...`);
 
-  // 1. Pre-assigned Business Class Passenger
-  // Tests if the system respects existing seat assignments.
   await prisma.passenger.create({
     data: {
       flightNumber: FLIGHT_TK,
@@ -20,13 +91,11 @@ async function main() {
       gender: "Male",
       nationality: "TR",
       seatType: "BUSINESS",
-      seatNumber: "1A",
+      seatNumber: "B1",
       affiliatedWith: [],
     },
   });
 
-  // Unassigned Business Class Passenger
-  // Tests if the system correctly assigns a Business seat to a VIP user.
   await prisma.passenger.create({
     data: {
       flightNumber: FLIGHT_TK,
@@ -40,8 +109,6 @@ async function main() {
     },
   });
 
-  // Family Group (Guardian & Infant)
-  // Tests logic for associating infants with guardians.
   const parentPassenger = await prisma.passenger.create({
     data: {
       flightNumber: FLIGHT_TK,
@@ -69,8 +136,6 @@ async function main() {
     },
   });
 
-  // Affiliated Passengers (Couple)
-  // Tests greedy approach for seating groups together.
   const partnerA = await prisma.passenger.create({
     data: {
       flightNumber: FLIGHT_TK,
@@ -102,46 +167,91 @@ async function main() {
     data: { affiliatedWith: [partnerB.id] },
   });
 
-  // Bulk Economy Passengers
-  // Tests general seat filling logic.
-  const bulkPassengers = [
-    { name: "Hans Mueller", age: 52, nat: "DE" },
-    { name: "Lars Jensen", age: 24, nat: "DK" },
-    { name: "Maria Garcia", age: 31, nat: "ES" },
-    { name: "Sophie Martin", age: 27, nat: "FR" },
-  ];
+  // TK1920 Bulk (Kalanları doldur)
+  for (let i = 0; i < 70; i++) {
+    const isBusiness = i < 6;
+    const randomName = `${getRandomElement(firstNames)} ${getRandomElement(
+      lastNames
+    )}`;
+    const randomNat = getRandomElement(nationalities);
+    const randomAge = getRandomInt(18, 75);
+    const randomGender = Math.random() > 0.5 ? "Male" : "Female";
 
-  for (const p of bulkPassengers) {
+    let preAssignedSeat = null;
+    if (i === 0 && isBusiness) preAssignedSeat = "B4";
+    if (i === 20 && !isBusiness) preAssignedSeat = "E15";
+
     await prisma.passenger.create({
       data: {
         flightNumber: FLIGHT_TK,
-        name: p.name,
-        age: p.age,
-        gender: "Female",
-        nationality: p.nat,
-        seatType: "ECONOMY",
-        seatNumber: null,
+        name: randomName,
+        age: randomAge,
+        gender: randomGender,
+        nationality: randomNat,
+        seatType: isBusiness ? "BUSINESS" : "ECONOMY",
+        seatNumber: preAssignedSeat,
         affiliatedWith: [],
       },
     });
   }
 
-  // 6. Shared Flight Passengers
-  // Tests data isolation between flights.
+  // --- 2. DİĞER UÇUŞLAR (OTOMATİK DOLDURMA) ---
+  const otherFlights = ["TK1071", "TK2023", "TK0050", "TK1821", "TK5005"];
+
+  console.log("Seeding other flights...");
+
+  for (const flightNum of otherFlights) {
+    // Her uçuş için rastgele 50 ile 90 arası yolcu üret
+    const passengerCount = getRandomInt(50, 90);
+
+    for (let i = 0; i < passengerCount; i++) {
+      const isBusiness = i < 5; // İlk 5'i business olsun
+      const randomName = `${getRandomElement(firstNames)} ${getRandomElement(
+        lastNames
+      )}`;
+      const randomNat = getRandomElement(nationalities);
+      const randomAge = getRandomInt(18, 75);
+      const randomGender = Math.random() > 0.5 ? "Male" : "Female";
+
+      // %10 ihtimalle koltuğu önceden seçilmiş olsun
+      let preAssignedSeat = null;
+      if (Math.random() < 0.1) {
+        preAssignedSeat = isBusiness
+          ? `B${getRandomInt(1, 4)}`
+          : `E${getRandomInt(1, 20)}`;
+      }
+
+      await prisma.passenger.create({
+        data: {
+          flightNumber: flightNum,
+          name: randomName,
+          age: randomAge,
+          gender: randomGender,
+          nationality: randomNat,
+          seatType: isBusiness ? "BUSINESS" : "ECONOMY",
+          seatNumber: preAssignedSeat,
+          affiliatedWith: [],
+        },
+      });
+    }
+    console.log(` -> ${flightNum} seeded with ${passengerCount} passengers.`);
+  }
+
+  // --- 3. HARİCİ UÇUŞ (TEST İÇİN) ---
   await prisma.passenger.create({
     data: {
-      flightNumber: FLIGHT_LH,
+      flightNumber: "TK1542",
       name: "Klaus Schmidt",
       age: 40,
       gender: "Male",
       nationality: "DE",
       seatType: "BUSINESS",
-      seatNumber: "2F",
+      seatNumber: "B1",
       affiliatedWith: [],
     },
   });
 
-  console.log("Seeding completed successfully.");
+  console.log(`All seeding completed.`);
 }
 
 main()
