@@ -1,0 +1,33 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SeatType {
+  BUSINESS
+  ECONOMY
+}
+
+model Passenger {
+  id             BigInt       @id @default(autoincrement())
+  name           String
+  age            Int
+  gender         String
+  nationality    String
+  seatType       SeatType
+  seatNumber     String?
+  flightNumber   String
+  //  Self-Relation
+  guardianId     BigInt?
+  guardian       Passenger?  @relation("GuardianInfant", fields: [guardianId], references: [id])
+  infants        Passenger[] @relation("GuardianInfant")
+  //  Next to each other 
+  affiliatedWith BigInt[]
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}

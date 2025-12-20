@@ -1,0 +1,40 @@
+{
+  "name": "passenger-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "dev": "nodemon src/server.js",
+    "seed": "node prisma/seed.js",
+    "start": "node src/server.js",
+    "generate:deploy:seed:start": "npx prisma generate && npx prisma migrate dev --name init_fix && npm run seed && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "express-validator": "^7.3.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.16",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.18.0",
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.16",
+    "vitest-mock-extended": "^3.1.0"
+  }
+}
