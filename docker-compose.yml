@@ -1,0 +1,317 @@
+
+services:
+
+  # ================================================
+  #              PILOT SERVICE DATABASE
+  # ================================================
+  pilot-db:
+    image: mariadb:11
+    container_name: pilot-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: pilot
+      MARIADB_USER: pilot_user
+      MARIADB_PASSWORD_FILE: /run/secrets/pilot_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/pilot_db_password
+    secrets:
+      - pilot_db_password
+    volumes:
+      - pilot_db_data:/var/lib/mysql
+      - ./backend/pilot-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  # ================================================
+  #           CREW CABIN SERVICE DATABASE
+  # ================================================
+  crew-db:
+    image: mariadb:11
+    container_name: crew-cabin-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: crew
+      MARIADB_USER: crew_user
+      MARIADB_PASSWORD_FILE: /run/secrets/crew_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/crew_db_password
+    secrets:
+      - crew_db_password
+    volumes:
+      - crew_db_data:/var/lib/mysql
+      - ./backend/crew-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3309:3306"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  # ================================================
+  #                  PILOT SERVICE
+  # ================================================
+  pilot-service:
+    build:
+      context: ./backend/pilot-service
+      dockerfile: Dockerfile
+    image: airapp/pilot-service:v1
+    container_name: pilot-service
+    restart: unless-stopped
+    env_file:
+      - ./backend/pilot-service/.env
+    environment:
+      PILOT_DB_PASSWORD_FILE: /run/secrets/pilot_db_password
+    secrets:
+      - pilot_db_password
+    ports:
+      - "8082:8082"
+    depends_on:
+      pilot-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8082/pilot-service/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  # ================================================
+  #               CREW CABIN SERVICE
+  # ================================================
+  crew-service:
+    build:
+      context: ./backend/crew-service
+      dockerfile: Dockerfile
+    image: airapp/crew-service:v1
+    container_name: crew-service
+    restart: unless-stopped
+    env_file:
+      - ./backend/crew-service/.env
+    environment:
+      CREW_DB_PASSWORD_FILE: /run/secrets/crew_db_password
+    secrets:
+      - crew_db_password
+    ports:
+      - "8083:8083"
+    depends_on:
+      crew-db:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8083/cabin-crew-service/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  # ================================================
+  #            MAIN SERVICE - MARIADB
+  # ================================================
+  main-maria-db:
+    image: mariadb:11
+    container_name: main-maria-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: main
+      MARIADB_USER: main_user
+      MARIADB_PASSWORD_FILE: /run/secrets/main_db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/main_db_password
+    secrets:
+      - main_db_password
+    volumes:
+      - main_maria_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ================================================
+  #            MAIN SERVICE - MONGODB
+  # ================================================
+  main-mongo-db:
+    image: mongo:7
+    container_name: main-mongo-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: main
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/main_mongo_password
+    secrets:
+      - main_mongo_password
+    volumes:
+      - main_mongo_db_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "echo 'db.runCommand({ ping: 1 })' | mongosh localhost:27017/main --quiet"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ================================================
+  #                  MAIN SERVICE
+  # ================================================
+  main-service:
+    build:
+      context: ./backend/main-service
+      dockerfile: Dockerfile
+    image: airapp/main-service:v1
+    container_name: main-service
+    restart: unless-stopped
+    env_file:
+      - ./backend/main-service/.env
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:supersecretpassword123@main-mongo-db:27017/main?authSource=admin
+
+    secrets:
+      - main_db_password
+      - main_mongo_password
+    ports:
+      - "8081:8080"
+    depends_on:
+      main-maria-db:
+        condition: service_healthy
+      main-mongo-db:
+        condition: service_healthy
+      pilot-service:
+        condition: service_healthy
+      crew-service:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8080/rosters/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ==============================
+  # FLIGHT SERVICE & DB
+  # ==============================
+  flight-service:
+    build:
+      context: ./backend/flight-service
+    image: airapp/flight-service:v1
+    container_name: flight-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    env_file:
+      - ./backend/flight-service/.env
+    depends_on:
+      flight-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:mysecretpassword_flight@flight-db:5432/flight_db
+
+  flight-db:
+    image: postgres:14-alpine
+    restart: always
+    container_name: flight-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: flight_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword_flight
+    volumes:
+      - flight_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==============================
+  # PASSENGER SERVICE & DB
+  # ==============================
+  passenger-service:
+    build:
+      context: ./backend/passenger-service
+    image: airapp/passenger-service:v1
+    container_name: passenger-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    env_file:
+      - ./backend/passenger-service/.env
+    depends_on:
+      passenger-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:mysecretpassword_passenger@passenger-db:5432/passenger_db
+
+  passenger-db:
+    image: postgres:14-alpine
+    restart: always
+    container_name: passenger-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: passenger_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword_passenger
+    volumes:
+      - passenger_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ================================================
+  #                  FRONTEND
+  # ================================================
+  frontend:
+    image: node:20-alpine
+    container_name: frontend
+    working_dir: /app
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      main-service:
+        condition: service_healthy
+
+
+
+# ===================================================
+#                       VOLUMES
+# ===================================================
+volumes:
+  pilot_db_data:
+  crew_db_data:
+  main_maria_db_data:
+  main_mongo_db_data:
+  flight_data:
+  passenger_data:
+
+
+# ===================================================
+#                       SECRETS
+# ===================================================
+secrets:
+  pilot_db_password:
+    file: secrets/pilot/db_pass.txt
+  crew_db_password:
+    file: secrets/crew/db_pass.txt
+  main_db_password:
+    file: secrets/main/maria_pass.txt
+  main_mongo_password:
+    file: secrets/main/mongo_pass.txt

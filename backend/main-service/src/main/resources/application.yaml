@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: main-service
+
+  profiles:
+    active: docker
+
+  datasource:
+    url: ${MAIN_MARIA_DB_URL}       # Değişti: CREW -> MAIN
+    username: ${MAIN_DB_USERNAME}   # Değişti
+    password: ${MAIN_DB_PASSWORD}   # Değişti
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Validate yerine update kullanmak dev ortamında daha rahattır
+    show-sql: true
+    open-in-view: false
+
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+
+# ==================================================
+#          DOWNSTREAM SERVICES (CLIENT URLS)
+# ==================================================
+services:
+  pilot-service:
+    url: ${PILOT_SERVICE_BASE_URL}
+
+  crew-service:
+    url: ${CREW_SERVICE_BASE_URL} # Burası Crew Service'e gittiği için CREW kalması doğrudur.
+
+  flight-service:
+    url: ${FLIGHT_SERVICE_BASE_URL}
+
+  passenger-service:
+    url: ${PASSENGER_SERVICE_BASE_URL}
+
+  auth-service:
+    url: http://auth-service:8080
