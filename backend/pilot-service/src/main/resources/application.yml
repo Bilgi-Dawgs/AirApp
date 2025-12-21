@@ -1,0 +1,29 @@
+server:
+  port: ${PILOT_SERVER_PORT}
+
+spring:
+  datasource:
+    url: ${PILOT_DB_URL}
+    username: ${PILOT_DB_USERNAME}
+    password: supersecretpassword123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+logging:
+  level:
+    root: INFO
+    com.airapp.pilotservice: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

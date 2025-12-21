@@ -1,0 +1,22 @@
+server:
+  port: 8082
+
+# Test ortamında ortam değişkeni hatası almamak için:
+PILOT_SERVER_PORT: 8082
+
+spring:
+  application:
+    name: pilot-service-test
+
+  # H2 Veritabanı Ayarları (MariaDB Modunda)
+  datasource:
+    url: jdbc:h2:mem:pilottestdb;DB_CLOSE_DELAY=-1;MODE=MariaDB
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  
+  # Hibernate'in H2'ye uygun davranması için
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop # Her testte tabloları silip baştan oluşturur
