@@ -1,0 +1,31 @@
+server:
+  port: ${CREW_SERVER_PORT}
+
+spring:
+  application:
+      name: main-service
+  datasource:
+    url: ${CREW_DB_URL}
+    username: ${CREW_DB_USERNAME}
+    password: supersecretpassword123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+logging:
+  level:
+    root: INFO
+    com.airapp.pilotservice: ${CREW_LOG_LEVEL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
